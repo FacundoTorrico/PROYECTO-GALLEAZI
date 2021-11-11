@@ -1,0 +1,3060 @@
+Tamaños:
+Formulario 	Heigh: 521 with: 805
+MultiPage	Heigh: 372 with: 690
+		left:   90 Top:   66
+Botones 	Heigh: 24  with: 78
+
+
+Dim IDUsr As String 'Declaracion de variable a nivel mdulo
+Public NumID As String
+Public NombreArtic As String
+Public PrecioVenta As Double
+Public IDArtCaja As String
+
+Private Sub CmbUser_Change()
+    Call BuscaUsuario 'Este evento al cambiar o capturar datos llama a la macro BuscaUsuario
+End Sub
+
+Private Sub CmbUser_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    Call BuscaUsuario 'Al abandonar o salir de este campo
+End Sub
+
+Sub BuscaUsuario()
+    If CmbUser = "" Then 'cuando queda sin datos el campo llama la macro LimpiaUsuarios para limpar los demas campos
+        Call LimpiaUsuarios
+        Exit Sub 'Sale del procedimiento
+    End If
+    Set u = Sheets("Usuarios")
+    uf = u.Range("B" & Rows.Count).End(xlUp).Row
+    'Busca el usuario, si existe lo consulta y no permite duplicarlo
+    For i = 2 To uf 'Con esta expresion iniciamos un ciclo o bucle, i es una variable que inicia con el valor indicado (2) y cada cilo cambia su valor hasta llegar al valor que tiene la variable uf
+        usuario = u.Cells(i, 2)
+        If usuario = CmbUser Then 'Esta linea de codigo evalua si se cumple o no la condicion
+            TxtPass = u.Cells(i, 3)
+            TxtNomUser = u.Cells(i, 4)
+            Txtemailuser = u.Cells(i, 5)
+            TxtTelUser = u.Cells(i, 6)
+            TxtDomUser = u.Cells(i, 7)
+            Exit For 'finaliza el clico o bucle, ya que se encontro el usuario buscado
+        ElseIf usuario = "" Or usuario <> CmbUser Then
+            Call LimpiaUsuarios
+        End If
+    Next i
+    'Busca privilegios del usuario
+    Set p = Sheets("PrivilegioUsuarios")
+    ufp = p.Range("A" & Rows.Count).End(xlUp).Row + 1
+    For X = 2 To ufp
+        usuario = p.Cells(X, 1) 'obtiene el usuario de la hoja PrivilegioUsuarios en la fila de la variable "X" y de la columna 1
+        If usuario = CmbUser Then ' se cumple la condicion, asigna los privilegios del usuario en cada casilla
+            'A partir de estas lineas de codigo lee en el archivo si tiene o  no privilegios en cada opcion del menu
+            If p.Cells(X, 2) = "1" Then
+                CbxCaja.Value = True
+            Else
+                CbxCaja.Value = False
+            End If
+            If p.Cells(X, 3) = "1" Then
+                CbxCorteCaja.Value = True
+            Else
+                CbxCorteCaja.Value = False
+            End If
+            If p.Cells(X, 4) = "1" Then
+                CbxCompras.Value = True
+            Else
+                CbxCompras.Value = False
+            End If
+            If p.Cells(X, 5) = "1" Then
+                CbxArticulos.Value = True
+            Else
+                CbxArticulos.Value = False
+            End If
+            If p.Cells(X, 6) = "1" Then
+                CbxClienteProv.Value = True
+            Else
+                CbxClienteProv.Value = False
+            End If
+            If p.Cells(X, 7) = "1" Then
+                CbxRep.Value = True
+            Else
+                CbxRep.Value = False
+            End If
+            If p.Cells(X, 8) = "1" Then
+                CbxUsers.Value = True
+            Else
+                CbxUsers.Value = False
+            End If
+            If p.Cells(X, 9) = "1" Then
+                CbxEmpresa.Value = True
+            Else
+                CbxEmpresa.Value = False
+            End If
+            If p.Cells(X, 10) = "1" Then
+                CbxConfig.Value = True
+            Else
+                CbxConfig.Value = False
+            End If
+            If p.Cells(X, 11) = "1" Then
+                CbxInventarios.Value = True
+            Else
+                CbxInventarios.Value = False
+            End If
+                CmdModifUser.Enabled = True
+                CmdGuardar.Enabled = False
+                CmdEliminar.Enabled = True
+            Exit For
+        End If
+    Next X
+End Sub
+
+Private Sub CmdAgregarCat_Click()
+Dim Categ As String
+    Sheets("Catalogos").Select
+    Set b = Sheets("Catalogos")
+    uf = b.Range("C" & Rows.Count).End(xlUp).Row + 1
+    For i = 2 To uf 'Busca si la Categoria existe para no duplicarla
+        Categ = b.Cells(i, 3)
+        If Categ = CmbCategoria.Text Then
+            MsgBox ("La categoria ya existe, no se puede agregar"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Exit Sub
+        End If
+    Next i
+    Worksheets("Catalogos").Unprotect Password:="***"
+    b.Cells(uf, 3) = CmbCategoria.Text 'en caso de que no exista la Categoria la agrega
+    Call OrdenaCat
+    Worksheets("Catalogos").Protect Password:="***"
+    MsgBox ("La categoria dada de alta con éxito"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+    Call Categoria
+End Sub
+Sub OrdenaCat()
+    'Ordenar Categoría
+    Set b = Sheets("Catalogos")
+    uf = b.Range("C" & Rows.Count).End(xlUp).Row + 1
+    Range("C3:C" & uf).Select
+    Sheets("Catalogos").Sort.SortFields.Clear
+    Sheets("Catalogos").Sort.SortFields.Add Key:=Range("C3:C" & uf) _
+        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+        xlSortTextAsNumbers
+    With Sheets("Catalogos").Sort
+        .SetRange Range("C3:C" & uf)
+        .Header = xlGuess
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+End Sub
+Private Sub CmdAgregarMarca_Click()
+    Set b = Sheets("Catalogos")
+    uf = b.Range("E" & Rows.Count).End(xlUp).Row + 1
+    For i = 2 To uf 'Busca si la Marca existe para no duplicarla
+        Marc = b.Cells(i, 5)
+        If Marc = CmbMarca.Value Then
+            MsgBox ("La Marca ya existe, no se puede agregar"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Exit Sub
+        End If
+    Next i
+    Worksheets("Catalogos").Unprotect Password:="***"
+    b.Cells(uf, 5) = CmbMarca.Text 'en caso de que no exista la Marca la agrega
+    Call OrdenaMarca
+    Worksheets("Catalogos").Protect Password:="***"
+    MsgBox ("Marca dada de alta con éxito"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+    Call Marca
+End Sub
+Sub OrdenaMarca()
+    'Ordenar Marca
+    Set b = Sheets("Catalogos")
+    uf = b.Range("E" & Rows.Count).End(xlUp).Row + 1
+    Range("E3:E" & uf).Select
+    ActiveWorkbook.Worksheets("Catalogos").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("Catalogos").Sort.SortFields.Add Key:=Range("E3:E" & uf) _
+        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+        xlSortTextAsNumbers
+    With ActiveWorkbook.Worksheets("Catalogos").Sort
+        .SetRange Range("E3:E" & uf)
+        .Header = xlGuess
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+End Sub
+
+Private Sub CmdAgregArtic_Click()
+    'Valida que se haya seleccionado un articulo, que la cantidad de articulo no este vacio o tenga cero para agregar al contenedor
+    If TxtArticCaja = "" Or TxtCant = "" Or TxtCant = 0 Then
+        MsgBox ("Seleccione un producto para poder agregarlo"), vbCritical, "Sistema Punto de Venta - Advertencia"
+        Exit Sub
+    'Valida que la cantidad a vender no sea mayor a la existencia del producto
+    ElseIf Val(TxtCant.Text) > Val(TxtExistInv.Text) Then
+        MsgBox ("La cantidad rebasa la existencia del producto"), vbCritical, "Sistema Punto de Venta - Advertencia"
+        Exit Sub
+    End If
+    Dim Dscto As Double
+    LstCaja.ColumnCount = 6
+    LstCaja.ColumnWidths = "55;250;65;70;60;70"
+    With LstCaja
+    .AddItem
+    Dim PVta As Integer
+        For i = 1 To 1
+            .List(.ListCount - 1, i - 1) = TxtIDArtc
+            .List(.ListCount - 1, i) = TxtArticCaja
+            .List(.ListCount - 1, i + 1) = FormatNumber(TxtCant, 0)
+            .List(.ListCount - 1, i + 2) = FormatNumber(CDbl(TxtPrecioVta), 2)
+            .List(.ListCount - 1, i + 3) = FormatNumber(CDbl(TxtDscto), 2)
+            .List(.ListCount - 1, i + 4) = FormatNumber((CDbl(TxtPrecioVta)) * (CDbl(TxtCant)) - CDbl(TxtDscto), 2)
+            Pventa = FormatNumber(CDbl(TxtPrecioVta), 2)
+            Dscto = FormatNumber(CDbl(TxtDscto), 2)
+            Total = FormatNumber((CDbl(TxtPrecioVta)) * (CDbl(TxtCant)) - CDbl(TxtDscto), 2)
+            Lng1 = Len(Pventa)
+            Lng2 = Len(Dscto)
+            Lng3 = Len(Total)
+            'Precio de venta
+            If Lng1 <= 4 Then
+                .List(.ListCount - 1, i + 2) = FormatNumber(CDbl(TxtPrecioVta), 2)
+                Imp1 = FormatNumber(Trim((Pventa)), 2)
+                LstCaja.List(LstCaja.ListCount - 1, i + 2) = Space(22 - 2 * Len(Imp1)) & Imp1
+            ElseIf Lng1 >= 5 Then
+                .List(.ListCount - 1, i + 2) = FormatNumber(CDbl(TxtPrecioVta), 2)
+                Imp1 = FormatNumber(Trim((Pventa)), 2)
+                LstCaja.List(LstCaja.ListCount - 1, i + 2) = Space(16 - 2 * Len(Imp1)) & Imp1
+            End If
+            'Descuento
+            If Lng2 <= 4 Then
+                .List(.ListCount - 1, i + 3) = FormatNumber(CDbl(TxtDscto), 2)
+                Imp2 = FormatNumber(Trim((Dscto)), 2)
+                LstCaja.List(LstCaja.ListCount - 1, i + 3) = Space(22 - 2 * Len(Imp2)) & Imp2
+            ElseIf Lng2 >= 5 Then
+                .List(.ListCount - 1, i + 3) = FormatNumber(CDbl(TxtDscto), 2)
+                Imp2 = FormatNumber(Trim((Dscto)), 2)
+                LstCaja.List(LstCaja.ListCount - 1, i + 3) = Space(16 - 2 * Len(Imp2)) & Imp2
+            End If
+            'Total
+            If Lng3 <= 4 Then
+                .List(.ListCount - 1, i + 4) = Format((CDbl(TxtPrecioVta) * (CDbl(TxtCant)) + CDbl(TxtDscto)), "##,##0.00#")
+                Imp3 = FormatNumber(Trim((Total)), 2)
+                LstCaja.List(LstCaja.ListCount - 1, i + 4) = Space(22 - 2 * Len(Imp3)) & Imp3
+            ElseIf Lng3 = 5 Then
+                .List(.ListCount - 1, i + 4) = Format((CDbl(TxtPrecioVta) * (CDbl(TxtCant)) + CDbl(TxtDscto)), "##,##0.00#")
+                Imp3 = FormatNumber(Trim((Total)), 2)
+                LstCaja.List(LstCaja.ListCount - 1, i + 4) = Space(16 - 2 * Len(Imp3)) & Imp3
+            ElseIf Lng3 = 6 Then
+                .List(.ListCount - 1, i + 4) = Format((CDbl(TxtPrecioVta) * (CDbl(TxtCant)) + CDbl(TxtDscto)), "##,##0.00#")
+                Imp3 = FormatNumber(Trim((Total)), 2)
+                LstCaja.List(LstCaja.ListCount - 1, i + 4) = Space(17 - 2 * Len(Imp3)) & Imp3
+            ElseIf Lng3 >= 7 Then
+                .List(.ListCount - 1, i + 4) = Format((CDbl(TxtPrecioVta) * (CDbl(TxtCant)) + CDbl(TxtDscto)), "##,##0.00#")
+                Imp3 = FormatNumber(Trim((Total)), 2)
+                LstCaja.List(LstCaja.ListCount - 1, i + 4) = Space(18 - 2 * Len(Imp3)) & Imp3
+            End If
+            TxtTotVenta = FormatNumber((CDbl(TxtTotVenta) + CDbl(Total)), 2)
+            TxtDscto = TxtDscto + FormatNumber((CDbl(TxtDscto) + CDbl(Dscto)), 2)
+        Next i
+            TxtArticCaja = ""
+            TxtCant = "1"
+            TxtPrecioVta = "0.00"
+            TxtExistInv = "0"
+            LbpProm = ""
+            LblStocMin = ""
+            LblTalla = ""
+            LblColor = ""
+            TxtEquivTC = "0"
+            TxtDscto = 0
+            TxtDsctoUSD = "0"
+    End With
+End Sub
+
+Private Sub CmdAgrgArt_Click()
+LstCompras.ColumnCount = 5
+LstCompras.ColumnWidths = "60;294;56;65;75"
+    If TxtIDArt = "" Then
+        MsgBox ("El articulo no ha sido dado de alta"), vbCritical, "Sistema Punto de Venta - Advertencia"
+        Exit Sub
+    ElseIf TxtNombreArtic = "" Or TxtNumArts = "" Or TxtPrecioCosto = "" Then
+        MsgBox ("Es necesario capturar todos los datos para agregar"), vbCritical, "Sistema Punto de Venta - Advertencia"
+        Exit Sub
+    Else
+        With LstCompras
+        .AddItem
+            For i = 1 To 1
+                Total = Format((CDbl(TxtPrecioCosto)) * (CDbl(TxtNumArts)), "##,##0.00")
+                .List(.ListCount - 1, i - 1) = TxtIDArt
+                .List(.ListCount - 1, i) = TxtNombreArtic
+                .List(.ListCount - 1, i + 1) = TxtNumArts
+                .List(.ListCount - 1, i + 2) = Format(TxtPrecioCosto, "##,##0.00#")
+                .List(.ListCount - 1, i + 3) = Format((CDbl(TxtPrecioCosto)) * (CDbl(TxtNumArts)), "##,##0.00#")
+                TxtSumFact = Format((CDbl(TxtSumFact) + CDbl(Total)), "##,##0.00#")
+            Next i
+        End With
+    End If
+    TxtIDArt = ""
+    TxtNombreArtic = ""
+    TxtNumArts = ""
+    TxtPrecioCosto = ""
+    TxtNombreArtic.SetFocus
+End Sub
+Sub stockMinimo()
+    Set a = Sheets("Articulos")
+    ufa = a.Range("C" & Rows.Count).End(xlUp).Row
+    Set b = Sheets("Inventario")
+    ufb = b.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 4 To ufb
+        Artic = b.Cells(i, 3)
+        Exist = b.Cells(i, 6)
+        If TxtArticCaja = Artic Then
+            For j = 2 To ufa
+                nArtic = a.Cells(j, 3)
+                sMin = a.Cells(j, 15)
+                If Val(Exist) <= Val(sMin) Then
+                    LblStocMin = "ESTE ARTICULO TIENE STICK MINIMO"
+                    Exit Sub
+                End If
+            Next j
+        End If
+    Next i
+End Sub
+
+Private Sub CmdArticulos_Click()
+    Me.MultiPage1.Value = 4
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = True
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(64, 64, 64)
+    CmdArticulos.ForeColor = RGB(255, 255, 255)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+    
+    Call Categoria
+    CmbCategoria = "Sin Categoria"
+    
+    Call Marca
+    CmbMarca = "Sin Marca"
+    
+    'Call CmdID_Click
+    Call IdProducto
+    
+    TxtFecProd = Format(Now, "dd/mm/yyyy")
+    
+    Call GeneraInventarioActual
+
+    Call Talla
+    Call Color
+    
+End Sub
+Sub Categoria()
+    'Categoria
+    Dim Categoria As String
+    CmbCategoria.Clear
+    Set b = Sheets("Catalogos")
+    ufc = b.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 2 To ufc
+        Categoria = b.Cells(i, 3)
+        CmbCategoria.AddItem Categoria
+    Next i
+    CmbCategoria.Text = "Sin Categoria"
+End Sub
+Sub Marca()
+    'Marca
+    Dim Marca As String
+    CmbMarca.Clear
+    Set C = Sheets("Catalogos")
+    ufM = C.Range("E" & Rows.Count).End(xlUp).Row
+    For i = 2 To ufM
+        Marca = C.Cells(i, 5)
+        CmbMarca.AddItem Marca
+    Next i
+    CmbMarca.Text = "Sin Marca"
+End Sub
+Sub GeneraInventarioActual()
+    'Sheets("Inventario").Activate 'codigo para ubicarnos en la hoja
+    Set a = Sheets("Inventario")
+    ufi = a.Range("D" & Rows.Count).End(xlUp).Row + 1
+    Worksheets("Inventario").Unprotect Password:="***"
+    LstInventario.Clear 'Limpia el listbox
+    Sheets("Inventario").Activate 'selecciona la hoja Inventario
+    Worksheets("Inventario").Range("A4:F" & ufi).ClearContents 'borra los datos de la hoja inventario a partir de la celda A4 hasta la ultima fila con datos
+    Dim Lista, Unicos As Range
+    Set C = Sheets("ComprasDetalle")
+    uf = C.Range("F" & Rows.Count).End(xlUp).Row + 1
+    Sheets("ComprasDetalle").Range("C4:D" & uf).Copy ' Copia de la hoja ComprasDetalle
+    a.Cells(4, 2).Select 'se posiciona en la celca B4
+    a.Cells(4, 2).PasteSpecial Paste:=xlValues 'Pega a la hoja Inventarios
+    Set Unicos = Sheets("Inventario").Range("B4:C" & uf) ' quita duplicados
+    'Quita duplicados
+    Worksheets("Inventario").Range("B4:C" & Range("C" & Rows.Count).End(xlUp).Row).RemoveDuplicates Columns:=1, Header:=xlNo
+
+    'Inserta Fecha y llena las columnas de ENTRADAS, SALIDAS Y EXISTENCIA
+    ufc = a.Range("C" & Rows.Count).End(xlUp).Row
+    Set b = Sheets("VentasDetalle")
+    For i = 4 To ufc
+        a.Cells(i, 1).Value = LblFechaHoy
+        clda = a.Cells(i, 3).Value
+        'Formula SUMAR.SICONJUNTO implementado con VBA
+        a.Cells(i, 4).Value = Application.WorksheetFunction.SumIf(Hoja8.Range("D:E"), a.Cells(i, 3).Value, Hoja8.Range("E:E"))
+        a.Cells(i, 5).Value = Application.WorksheetFunction.SumIf(Hoja12.Range("D:E"), a.Cells(i, 3).Value, Hoja12.Range("E:E"))
+        'Formula =COLUMA D - COLUMNA E
+        a.Cells(i, 6).Value = a.Cells(i, 4).Value - a.Cells(i, 5).Value
+    Next i
+    'inserta el texto en la fila 2
+    Worksheets("Inventario").Range("A2").Value = "INVENTARIO DE PRODUCTOS AL DIA: " & TxtFecInv.Text
+    Worksheets("Inventario").Protect Password:="***"
+
+End Sub
+
+Private Sub CmdBsucCliente_Click()
+    LstCliente.Visible = False
+    LstCliente.Height = 80
+    LstCliente.Clear
+    LstCliente.ColumnCount = 1
+    LstCliente.ColumnWidths = "180"
+    Set p = Sheets("Clientes_Proveedores")
+    uf = p.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        Cliente = p.Cells(i, 4)
+        Tipo = p.Cells(i, 3)
+        If Tipo = "CLIENTE" Then
+            LstCliente.Visible = True
+            LstCliente.AddItem Cliente
+        End If
+    Next i
+    If LstCliente.Visible = False Then
+        MsgBox ("No existen coincidencia para buscar"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+        TxtArtic = ""
+    End If
+End Sub
+
+Private Sub CmdBuscProv_Click()
+    LstProv.Visible = False
+    LstProv.Height = 80
+    LstProv.Clear
+    LstProv.ColumnCount = 1
+    LstProv.ColumnWidths = "195"
+    Set p = Sheets("Clientes_Proveedores")
+    uf = p.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        Prov = p.Cells(i, 4)
+        If UCase(Prov) Like UCase(TxtNombreProv.Value) & "*" Then
+            LstProv.Visible = True
+            LstProv.AddItem Prov
+        End If
+    Next i
+    If LstProv.Visible = False Then
+        MsgBox ("No existen coincidencia para buscar"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+        TxtArtic = ""
+    End If
+End Sub
+
+Private Sub CmdClienProv_Click()
+    Me.MultiPage1.Value = 5
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = True
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(64, 64, 64)
+    CmdClienProv.ForeColor = RGB(255, 255, 255)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+
+    TxtFechaProv.Text = Format(Now, "dd/mm/yyyy")
+    Call IdProveed
+    
+End Sub
+
+Private Sub CmdCobrar_Click()
+    Dim Ticket As String: Dim FechaVta As Date
+    LstArticCaja.Visible = False
+    LstCliente.Visible = False
+    'Valida que el total recibido no sea menor al total de la venta
+    If Val(TxtRecibido) < Val(TxtTotVenta) Then
+        MsgBox ("El total a cobrar es menor que el total de la Venta"), vbCritical, "Sistema Punto de Venta - Advertencia"
+        Exit Sub
+    End If
+    Set b = Sheets("Ventas")
+    uf = b.Range("A" & Rows.Count).End(xlUp).Row + 1
+    'Guarda en la hoja Ventas
+    Worksheets("Ventas").Unprotect Password:="***"
+    NumTicket = b.Cells(uf - 1, 2)
+    FechaVta = Format(Now, "dd/mm/yyyy")
+    If IsNumeric(NumTicket) Then
+        NumTicket = NumTicket + 1
+    Else
+        NumTicket = 1
+    End If
+    'Validacion cuando es a credito
+    If OptCredito.Value = True And TxtCliente = "" Then
+        MsgBox ("Forma de pago Crédito es necesario seleccionar el cliente"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+       Exit Sub
+    Else
+        b.Cells(uf, 1) = FechaVta
+        b.Cells(uf, 2) = NumTicket
+        b.Cells(uf, 3) = FormatNumber(TxtTotVenta, 2)
+        b.Cells(uf, 4) = FormatNumber(TxtRecibido, 2)
+        b.Cells(uf, 5) = FormatNumber(TxtCambio, 2)
+        'Valida la forma de pago
+        If OptEfectivo.Value = True Then
+            b.Cells(uf, 6) = "Efectivo"
+        ElseIf OptTarjeta.Value = True Then
+            b.Cells(uf, 6) = "Tajeta"
+        ElseIf OptCredito.Value = True Then
+            b.Cells(uf, 6) = "Credito"
+        End If
+        b.Cells(uf, 7) = TxtCliente
+        Worksheets("Ventas").Protect Password:="***"
+        'Guarda Articulos en la hoja VentasDetalle
+        For X = 0 To LstCaja.ListCount - 1
+            Worksheets("VentasDetalle").Unprotect Password:="***"
+            Set v = Sheets("VentasDetalle")
+            ufv = v.Range("B" & Rows.Count).End(xlUp).Row + 1
+            IDart = LstCaja.List(X, 0)
+            'NombreArt = LstCompras.List(X, 1) ===  Esta liena de codigo no funciona con office 2016
+            'Costounit = LstCompras.List(X, 3) ===  Esta liena de codigo no funciona con office 2016
+            v.Cells(ufv, 1).Value = LblFechaHoy
+            v.Cells(ufv, 2).Value = NumTicket
+            v.Cells(ufv, 3).Value = LstCaja.List(X, 0)
+            v.Cells(ufv, 4).Value = LstCaja.List(X, 1)
+            v.Cells(ufv, 5).Value = LstCaja.List(X, 2)
+            v.Cells(ufv, 6).Value = FormatNumber(LstCaja.List(X, 3), 2)
+            v.Cells(ufv, 7).Value = FormatNumber(LstCaja.List(X, 4), 2)
+            v.Cells(ufv, 8).Value = FormatNumber(LstCaja.List(X, 5), 2)
+            Worksheets("VentasDetalle").Protect Password:="***"
+        Next X
+        'Guarda en la hoja ticket
+        Set t = Sheets("Ticket")
+        uft = t.Range("A" & Rows.Count).End(xlUp).Row + 1
+        Worksheets("Ticket").Unprotect Password:="***"
+        Worksheets("Ticket").Range("A4:E200" & uft).ClearContents
+        t.Cells(4, 1).Value = "Fecha: " & Now & " *** " & " Ticket No. " & NumTicket
+        t.Cells(5, 1).Value = "ART"
+        t.Cells(5, 3).Value = "CANT"
+        t.Cells(5, 4).Value = "UNIT"
+        t.Cells(5, 5).Value = " TOTAL"
+        
+        For Y = 0 To LstCaja.ListCount - 1
+            uft = t.Range("C" & Rows.Count).End(xlUp).Row + 1
+            Unit = LstCaja.List(Y, 3)
+            Tot = LstCaja.List(Y, 5)
+            t.Cells(uft, 1).Value = LstCaja.List(Y, 1)
+            t.Cells(uft + 1, 3).Value = LstCaja.List(Y, 2)
+            t.Cells(uft + 1, 4).Value = FormatNumber(Unit, 2)
+            t.Cells(uft + 1, 5).Value = FormatNumber(Tot, 2)
+        Next Y
+            uft = t.Range("C" & Rows.Count).End(xlUp).Row + 1
+            t.Cells(uft, 2).Value = "TOTAL"
+            t.Cells(uft, 5).Value = TxtTotVenta
+            t.Cells(uft + 1, 2).Value = "DESCTO"
+            t.Cells(uft + 1, 5).Value = TxtTocDscto
+            t.Cells(uft + 2, 2).Value = "RECIBIDO"
+            t.Cells(uft + 2, 5).Value = TxtRecibido
+            t.Cells(uft + 3, 2).Value = "CAMBIO"
+            t.Cells(uft + 3, 5).Value = TxtCambio
+            t.Cells(uft + 4, 1).Value = "!!! GRACIAS POR SU COMPRA !!! "
+            Call Imp_Ticket 'Impresion del ticket
+            Call LimpiaVentas
+            Call GeneraInventarioActual
+            Worksheets("VentasDetalle").Protect Password:="***"
+            Worksheets("Ticket").Protect Password:="***"
+            ActiveWorkbook.Save
+        End If
+End Sub
+Sub Imp_Ticket()
+    Application.ScreenUpdating = True
+    resultado = MsgBox("¿Desea imprimir el documento?", vbYesNo + vbQuestion, "Sistema Punto de Venta")
+    Select Case resultado
+    Case vbYes:
+        Sheets("Ticket").Select
+        ActiveWindow.SelectedSheets.PrintOut Copies:=1, Collate:=True, _
+        IgnorePrintAreas:=False
+    Case vbNo:
+        Close
+     End Select
+End Sub
+Private Sub CmdColor_Click()
+Dim Categ As String
+    Set C = Sheets("Catalogos")
+    uf = C.Range("I" & Rows.Count).End(xlUp).Row + 1
+    For i = 2 To uf 'Busca si el color existe para no duplicarla
+        nColor = C.Cells(i, 9)
+        If nColor = CmbColor.Text Then
+            MsgBox ("El color ya existe, no se puede agregar"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Exit Sub
+        End If
+    Next i
+    Worksheets("Catalogos").Unprotect Password:="***"
+    C.Cells(uf, 9) = CmbColor.Text 'en caso de que no exista el color la agrega
+    Worksheets("Catalogos").Protect Password:="***"
+    MsgBox ("Color dada de alta con éxito"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+    Call Color
+End Sub
+Sub Color()
+    'Categoria
+    Dim nColor As String
+    CmbColor.Clear
+    Set C = Sheets("Catalogos")
+    uf = C.Range("I" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        nColor = C.Cells(i, 9)
+        CmbColor.AddItem nColor
+    Next i
+    CmbColor.Text = ""
+End Sub
+Private Sub CmdCompras_Click()
+    Me.MultiPage1.Value = 3
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = True
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCompras.BackColor = RGB(64, 64, 64)
+    CmdCompras.ForeColor = RGB(255, 255, 255)
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+    
+    'Proveedor
+    Set b = Sheets("Clientes_Proveedores")
+    uf = b.Range("C" & Rows.Count).End(xlUp).Row
+    CmbProveedor.Clear
+    For i = 2 To uf
+        Tipo = b.Cells(i, 3)
+        Prov = b.Cells(i, 4)
+        If Tipo = "PROVEEDOR" Then
+            CmbProveedor.AddItem Prov
+        End If
+    Next i
+    
+    'Forma de pago
+    CmbFormaPago.Clear
+    CmbFormaPago.AddItem "Efectivo"
+    CmbFormaPago.AddItem "Cheque"
+    CmbFormaPago.AddItem "Transferencia"
+    CmbFormaPago.AddItem "Tarjeta de Crédito"
+End Sub
+
+Private Sub CmdConfig_Click()
+    Me.MultiPage1.Value = 9
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = True
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(0, 0, 0) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(64, 64, 64)
+    CmdConfig.ForeColor = RGB(255, 255, 255)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdConsFact_Click()
+    LstBuscFact.Visible = False
+    LstBuscFact.Height = 55
+    LstBuscFact.Clear
+    LstBuscFact.ColumnCount = 4
+    LstBuscFact.ColumnWidths = "40;70;70;150"
+    Set C = Sheets("Compras")
+    uf = C.Range("A" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        Fecfact = C.Cells(i, 1)
+        NFact = C.Cells(i, 2)
+        Impt = C.Cells(i, 3)
+        Prov = C.Cells(i, 4)
+        If NFact Like TxtFactCompra & "*" Then
+            LstBuscFact.Visible = True
+            LstBuscFact.AddItem NFact
+            LstBuscFact.List(LstBuscFact.ListCount - 1, 1) = Fecfact
+            LstBuscFact.List(LstBuscFact.ListCount - 1, 2) = FormatNumber(Impt, 2)
+            LstBuscFact.List(LstBuscFact.ListCount - 1, 3) = Prov
+        End If
+    Next i
+    If LstBuscFact.Visible = False Then
+        MsgBox ("No existen coincidencia para buscar"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+        TxtArtic = ""
+    End If
+End Sub
+
+Private Sub CmdCorteCaja_Click()
+    Me.MultiPage1.Value = 2
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(2).Enabled = True
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(64, 64, 64)
+    CmdCorteCaja.ForeColor = RGB(255, 255, 255)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdCaja_Click()
+    Me.MultiPage1.Value = 1 '
+    MultiPage1.Pages(0).Enabled = False 'con False: Deshabilita la pestaña 1
+    MultiPage1.Pages(1).Enabled = True  'Habilita la pestaña cero (0) o de nombre inicio
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(64, 64, 64) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(255, 255, 255) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+    
+    Call BuscaTC
+    
+    Call BuscaSaldoInicial
+    
+    If TxtTipoCambio.Text = 0 Then
+        MsgBox ("No ha capturado el tipo de cambio"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+    End If
+    
+    Call GeneraInventarioActual
+    
+End Sub
+Sub BuscaTC()
+    'Busca Tipo de Cambio
+    Set C = Sheets("Catalogos")
+    uf = C.Range("K" & Rows.Count).End(xlUp).Row
+    Dim Fecc As Date
+    Fecc = Format(LblFechaHoy, "dd/mm/yyyy")
+    For i = 2 To uf
+        fecTC = C.Cells(i, 11)
+        TC = C.Cells(i, 12)
+        If fecTC = LblFechaHoy Then
+            TxtTipoCambio = TC
+            If TxtTipoCambio = 0 Then
+                CmdTC.Visible = True
+                TxtTipoCambio.Visible = True
+                CmdGuardaTC.Visible = True
+            Else
+                TxtTipoCambio.Text = TC
+                CmdTC.Visible = True
+                CmdGuardaTC.Visible = True
+                Exit For
+            End If
+        End If
+    Next i
+End Sub
+Sub BuscaSaldoInicial()
+    Dim FechaHoy As Date
+    Dim Fecc As Date
+    FechaHoy = LblFechaHoy
+    Set b = Sheets("MovCaja")
+    uf = b.Range("A" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        Fecc = b.Cells(i, 1).Value
+        Mov = b.Cells(i, 2).Value
+        If Fecc = FechaHoy And Mov = "INICIAL" Then
+            TxtInicial = FormatNumber(b.Cells(i, 3).Value, 2)
+            TxtInicial.Enabled = False
+            Exit Sub
+        End If
+    Next i
+End Sub
+Private Sub CmdElimArt_Click()
+    If MsgBox("¿Desea eliminar el registro seleccionado?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then
+    Else
+        ImpArt = LstCompras.List(LstCompras.ListIndex, 4)
+        LstCompras.RemoveItem LstCompras.ListIndex
+        TxtSumFact = Format(CDbl(TxtSumFact) - CDbl(ImpArt), "##,##0.00")
+        TxtNombreArtic.SetFocus
+        LstCompras.Selected(0) = False 'Des-selecciona la fila del listbox
+        LstCompras.Selected(2) = False
+        LstCompras.Selected(3) = False
+        LstCompras.Selected(4) = False
+        CmdElimArt.Enabled = False
+    End If
+End Sub
+
+Private Sub CmdElimArtVta_Click()
+    'Elimina el articulo del contenedor
+    If MsgBox("¿Desea eliminar el registro seleccionado?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then
+        Exit Sub
+    ElseIf LstCaja.ListIndex = -1 Then
+        MsgBox ("Seleccione un articulo para eliminar?"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+        Exit Sub
+    Else
+        ImpArtVta = LstCaja.List(LstCaja.ListIndex, 3)
+        TxtTotVenta = Format(CDbl(TxtTotVenta) - CDbl(ImpArtVta), "##,##0.00")
+        LstCaja.RemoveItem LstCaja.ListIndex
+        TxtArticCaja.SetFocus
+        CmdElimArtVta.Enabled = False
+        LstCaja.Selected(0) = False
+        LstCaja.Selected(1) = False
+        LstCaja.Selected(2) = False
+        LstCaja.Selected(3) = False
+    End If
+End Sub
+
+Private Sub cmdElimClPr_Click()
+    Dim FechaHoy As Date
+    FechaHoy = Format(Now, "dd/mm/yyyy")
+    Set b = Sheets("Clientes_Proveedores")
+    uf = b.Range("C" & Rows.Count).End(xlUp).Row + 1
+    If MsgBox("¿Desea elimimar el Proveedor?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then
+        Exit Sub
+    Else
+        For i = 2 To uf
+            IDProv = b.Cells(i, 2)
+            NombrePrv = b.Cells(i, 3)
+            If IDProv = TxtIDProv Then
+                Worksheets("Clientes_Proveedores").Unprotect Password:="***"
+                b.Cells(i, 9) = "INACTIVO"
+                b.Cells(i, 10) = FechaHoy
+                Call LimpiarProv
+                Call IdProveed
+                CmdRegProv.Enabled = True
+                CmdModifProv.Enabled = False
+                cmdElimClPr.Enabled = False
+                Worksheets("Clientes_Proveedores").Protect Password:="***"
+                ActiveWorkbook.Save
+                Exit Sub
+            End If
+        Next i
+    End If
+End Sub
+
+Private Sub CmdElimCompra_Click()
+    'Busca Factura para eliminar
+    If MsgBox("¿Desea Eliminar la Factuar actual?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then
+        Exit Sub
+    Else
+        Sheets("Compras").Select
+        Set b = Sheets("Compras")
+        uf = b.Range("A" & Rows.Count).End(xlUp).Row
+        For i = 2 To uf
+            NFact = b.Cells(i, 2)
+            If Str(NFact) = Str(TxtFactCompra) Then
+                Worksheets("Compras").Unprotect Password:="***"
+                b.Cells(i, 2).Select
+                ActiveCell.EntireRow.Delete
+                Worksheets("Compras").Protect Password:="***"
+                'Busca Artic para eliminarlos
+                Sheets("ComprasDetalle").Select
+                Set C = Sheets("ComprasDetalle")
+                uff = C.Range("A" & Rows.Count).End(xlUp).Row
+                For X = 0 To LstCompras.ListCount - 1
+                    IDArtselect = LstCompras.List(X, 0)
+                    For Y = 4 To uff
+                        NumFacDet = C.Cells(Y, 2)
+                        IDart = C.Cells(Y, 3)
+                        If Str(NumFacDet) = Str(TxtFactCompra) And Val(IDArtselect) = Val(IDart) Then
+                            Worksheets("ComprasDetalle").Unprotect Password:="***"
+                            C.Cells(Y, 2).Select
+                            ActiveCell.EntireRow.Delete 'Elimina todo el registro
+                            Worksheets("ComprasDetalle").Protect Password:="***"
+                            ActiveWorkbook.Save
+                        End If
+                    Next Y
+                Next X
+            End If
+        Next i
+        Call LimpiaCompras
+        CmdRegProd.Enabled = True
+        CmdModifProd.Enabled = False
+    End If
+End Sub
+
+Private Sub CmdEliminar_Click()
+    Dim FechaHoy As Date 'Crear variable de tipo fecha
+    Set u = Sheets("Usuarios")
+    uf = u.Range("B" & Rows.Count).End(xlUp).Row + 1
+    If CmbUser = "Admin" Then 'Evitamos que se elimine el usuario "Admin"
+        MsgBox ("Usuario Admin no se puede eliminar?"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+        Exit Sub
+    ElseIf MsgBox("Desea eliminar el registro actual?", vbYesNo + vbQuestion, "Sistema Punto de Venta") = vbNo Then
+        Exit Sub
+    Else
+        For i = 2 To uf
+            usuario = u.Cells(i, 2)
+            If CmbUser = usuario Then 'Al encontrar el usuario se cumple la condicion
+                Worksheets("Usuarios").Unprotect Password:="***"
+                FechaHoy = Format(LblFechaHoy, "dd/mm/yyyy") 'En la variable FechaHoy obtenemos la fecha del label "LblFechaHoy"
+                u.Cells(i, 8) = "INACTIVO" 'Guardamos en la columna status como INACTIVO
+                u.Cells(i, 10) = FechaHoy 'Guardamos la fecha de baja del usuario
+                Worksheets("Usuarios").Protect Password:="***"
+                ActiveWorkbook.Save
+                Call LimpiaUsuarios
+                Call CargaUsuarios
+                Exit For
+            End If
+        Next i
+    End If
+End Sub
+
+Private Sub CmdEliminarArt_Click()
+   'Buscar el articulo
+    Set C = Sheets("Articulos")
+    uf = C.Range("B" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        Artic = C.Cells(i, 3)
+        Status = C.Cells(i, 12)
+        If UCase(Artic) = UCase(TxtArtic) Then
+            If MsgBox("Desea eliminar el registro actual?", vbYesNo + vbQuestion, "Sistema Punto de Venta") = vbNo Then
+                Exit Sub
+            Else
+                If Artic = TxtArtic And Status = "INACTIVO" Then 'Validamos en nombre y status del producto
+                    MsgBox ("El articulo ya esta elimnado"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+                    Exit Sub
+                End If
+                Worksheets("Articulos").Unprotect Password:="***"
+                C.Cells(i, 12) = "INACTIVO"
+                Worksheets("Articulos").Protect Password:="***"
+                MsgBox ("El articulo " & Artic & " ha sido dado de baja"), vbOKOnly + vbInformation, "Sistema Punto de venta"
+                Exit Sub
+            End If
+        End If
+    Next i
+End Sub
+
+Private Sub CmdEmpresa_Click()
+    Me.MultiPage1.Value = 8
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = True
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(0, 0, 0) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(64, 64, 64)
+    CmdEmpresa.ForeColor = RGB(255, 255, 255)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdGenInv_Click()
+Call GeneraInventarioActual
+
+    CargaListboxInv
+
+End Sub
+
+Private Sub CmdGuardar_Click()
+    Dim FechaHoy As Date 'Crear variable de tipo fecha
+    Set u = Sheets("Usuarios")
+    uf = u.Range("A" & Rows.Count).End(xlUp).Row + 1
+    If CmbUser = "" Or TxtPass = "" Or TxtNomUser = "" Or Txtemailuser = "" Or TxtTelUser = "" Or TxtDomUser = "" Then
+        MsgBox "Datos incompletos, no se puede procesar su peticion", vbOKOnly + vbCritical, "Sistema Punto de Venta"
+        Exit Sub 'Salir del procedimiento
+    ElseIf MsgBox("¿Desea guardar el registro?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then
+        Exit Sub
+    Else
+        Worksheets("Usuarios").Unprotect Password:="***" 'Desprotege la hoja
+        FechaHoy = Format(LblFechaHoy, "dd/mm/yyyy") 'En la variable FechaHoy obtenemos la fecha del label "LblFechaHoy"
+        Call IDUser 'Llama la macro que crea el ID consecutivo
+        'Guardar los datos en la hoja Usuarios
+        u.Cells(uf, 1) = IDUsr
+        u.Cells(uf, 2) = CmbUser
+        u.Cells(uf, 3) = TxtPass
+        u.Cells(uf, 4) = TxtNomUser
+        u.Cells(uf, 5) = Txtemailuser
+        u.Cells(uf, 6) = TxtTelUser
+        u.Cells(uf, 7) = TxtDomUser
+        u.Cells(uf, 8) = "ACTIVO"
+        u.Cells(uf, 9) = FechaHoy
+        Worksheets("Usuarios").Protect Password:="***" 'Protege la hoja
+        ActiveWorkbook.Save 'Guarda el archivo
+    End If
+    Call GuardaPriv
+    Call LimpiaUsuarios
+    Call CargaUsuarios 'Carga los usuario al ComboBox
+End Sub
+Sub IDUser()
+    
+    Set u = Sheets("Usuarios")
+    uf = u.Range("A" & Rows.Count).End(xlUp).Row
+    For i = 1 To uf
+        IDUsr = u.Cells(i, 1).Value
+        If IDUsr = "" Or IDUsr = "ID" Then
+            IDUsr = 1
+        Else
+            IDUsr = IDUsr + 1
+        End If
+    Next i
+End Sub
+Sub GuardaPriv()
+    Set p = Sheets("PrivilegioUsuarios")
+    uf = p.Range("A" & Rows.Count).End(xlUp).Row + 1
+    For i = 2 To uf 'Ciclo o bucle
+        usuario = p.Cells(i, 1)
+        If usuario = CmbUser Then 'Busca si el usuario existe
+            Worksheets("PrivilegioUsuarios").Unprotect Password:="***" 'Desprotege la hoja
+            p.Cells(i, 1) = CmbUser
+            If CbxCaja.Value = True Then
+                p.Cells(i, 2) = "1"
+            Else
+                p.Cells(i, 2) = "0"
+            End If
+            If CbxCorteCaja.Value = True Then
+                p.Cells(i, 3) = "1"
+            Else
+                p.Cells(i, 3) = "0"
+            End If
+            If CbxCompras.Value = True Then
+                p.Cells(i, 4) = "1"
+            Else
+                p.Cells(i, 4) = "0"
+            End If
+            If CbxArticulos.Value = True Then
+                p.Cells(i, 5) = "1"
+            Else
+                p.Cells(i, 5) = "0"
+            End If
+            If CbxClienteProv.Value = True Then
+                p.Cells(i, 6) = "1"
+            Else
+                p.Cells(i, 6) = "0"
+            End If
+            If CbxRep.Value = True Then
+                p.Cells(i, 7) = "1"
+            Else
+                p.Cells(i, 7) = "0"
+            End If
+            If CbxUsers.Value = True Then
+                p.Cells(i, 8) = "1"
+            ElseIf CmbUser = "Admin" Then 'Evitamos que al usuario "Admin" no se le pueda quitar el privilegio "Usuarios"
+                MsgBox ("Usuario Admin no se le puede quitar el privilegio Usuarios"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Else
+                p.Cells(i, 8) = "0"
+            End If
+            If CbxEmpresa.Value = True Then
+                p.Cells(i, 9) = "1"
+            Else
+                p.Cells(i, 9) = "0"
+            End If
+            If CbxConfig.Value = True Then
+                p.Cells(i, 10) = "1"
+            Else
+                p.Cells(i, 10) = "0"
+            End If
+            If CbxInventarios.Value = True Then
+                p.Cells(i, 11) = "1"
+            Else
+                p.Cells(i, 11) = "0"
+            End If
+            p.Cells(i, 12) = LblUser
+            
+            Dim fechareg As Date 'Declaracion de una variable a nivel procedimiento
+            fechareg = Format(LblFechaHoy, "dd/mm/yyyy") 'Le asignamos el valor de la fecha que tiene el formulario en ela etiqueda fecha
+            p.Cells(i, 13) = fechareg  'Guardamos la fecha en la hoja
+            Worksheets("PrivilegioUsuarios").Protect Password:="***" 'Protege la hoja
+            Call Privilegios
+            Exit Sub
+        End If
+    Next i
+        Worksheets("PrivilegioUsuarios").Unprotect Password:="***" 'Desprotege la hoja
+        p.Cells(uf, 1) = CmbUser 'Guarda el nombre de usuario
+        'Guarda los privilegios
+        If CbxCaja.Value = True Then 'Valida si la esta seleccionado
+            p.Cells(uf, 2) = "1"
+        Else
+            p.Cells(uf, 2) = "0"
+        End If
+        If CbxCorteCaja.Value = True Then
+            p.Cells(uf, 3) = "1"
+        Else
+            p.Cells(uf, 3) = "0"
+        End If
+        If CbxCompras.Value = True Then
+            p.Cells(uf, 4) = "1"
+        Else
+            p.Cells(uf, 4) = "0"
+        End If
+        If CbxArticulos.Value = True Then
+            p.Cells(uf, 5) = "1"
+        Else
+            p.Cells(uf, 5) = "0"
+        End If
+        If CbxClienteProv.Value = True Then
+            p.Cells(uf, 6) = "1"
+        Else
+            p.Cells(uf, 6) = "0"
+        End If
+        If CbxRep.Value = True Then
+            p.Cells(uf, 7) = "1"
+        Else
+            p.Cells(uf, 7) = "0"
+        End If
+        If CbxUsers.Value = True Then 'Tenia un error en el nombre
+            p.Cells(uf, 8) = "1"
+        Else
+            p.Cells(uf, 8) = "0"
+        End If
+        If CbxEmpresa.Value = True Then
+            p.Cells(uf, 9) = "1"
+        Else
+            p.Cells(uf, 9) = "0"
+        End If
+        If CbxConfig.Value = True Then
+            p.Cells(uf, 10) = "1"
+        Else
+            p.Cells(uf, 10) = "0"
+        End If
+        If CbxInventarios.Value = True Then
+            p.Cells(uf, 11) = "1"
+        Else
+            p.Cells(uf, 11) = "0"
+        End If
+        p.Cells(uf, 12) = LblUser 'Guarda el usuario que dio de alta
+        p.Cells(uf, 13) = Format(Now, "dd/mm/yyyy") 'Guarda la fecha en que se dio de alta
+        Worksheets("PrivilegioUsuarios").Protect Password:="***" 'Protege la hoja
+        ActiveWorkbook.Save
+End Sub
+Sub LimpiaUsuarios()
+    CmbUsers = ""
+    TxtPass = ""
+    TxtNomUser = ""
+    Txtemailuser = ""
+    TxtTelUser = ""
+    TxtDomUser = ""
+    CbxCaja.Value = False
+    CbxCorteCaja.Value = False
+    CbxCompras.Value = False
+    CbxArticulos.Value = False
+    CbxClienteProv.Value = False
+    CbxRep.Value = False
+    CbxUsers.Value = False
+    CbxEmpresa.Value = False
+    CbxConfig.Value = False
+    CbxInventarios.Value = False
+    CmdModifUser.Enabled = False 'inhabilita el boton Registrar
+    CmdGuardar.Enabled = True 'Habilita el boton Registrar
+    CmdEliminar.Enabled = False 'inhabilita el boton Eliminar
+End Sub
+Sub CargaUsuarios()
+    Set u = Sheets("Usuarios")
+    uf = u.Range("B" & Rows.Count).End(xlUp).Row
+    CmbUser.Clear 'Con esta propiedad limpiamos el combo que contine la lista desplegable de usuarios
+    For i = 2 To uf 'Ciclo o bucle
+        Status = u.Cells(i, 8)
+        If Status = "ACTIVO" Then
+            CmbUser.AddItem u.Cells(i, 2) 'Cargamos en la lista despletable del ComboBox los usuarios existentes
+        End If
+    Next i
+End Sub
+Sub Privilegios() 'Asigna Privilegios (habilita o deshabilita los botones de opciones del menu)
+    Set p = Sheets("PrivilegioUsuarios")
+    uf = p.Range("A" & Rows.Count).End(xlUp).Row + 1
+    For i = 2 To uf
+        usuario = p.Cells(i, 1)
+        If usuario = TxtUser Then
+            
+            If p.Cells(i, 2) = "1" Then
+                CmdCaja.Enabled = True
+            Else
+                CmdCaja.Enabled = False
+            End If
+            If p.Cells(i, 3) = "1" Then
+                CmdCorteCaja.Enabled = True
+            Else
+                CmdCorteCaja.Enabled = False
+            End If
+            If p.Cells(i, 4) = "1" Then
+                CmdCompras.Enabled = True
+            Else
+                CmdCompras.Enabled = False
+            End If
+            If p.Cells(i, 5) = "1" Then
+                CmdArticulos.Enabled = True
+            Else
+                CmdArticulos.Enabled = False
+            End If
+            If p.Cells(i, 6) = "1" Then
+                CmdClienProv.Enabled = True
+            Else
+                CmdClienProv.Enabled = False
+            End If
+            If p.Cells(i, 7) = "1" Then
+                CmdReportes.Enabled = True
+            Else
+                CmdReportes.Enabled = False
+            End If
+            If p.Cells(i, 8) = "1" Then
+                CmdUsuarios.Enabled = True
+            Else
+                CmdUsuarios.Enabled = False
+            End If
+            If p.Cells(i, 9) = "1" Then
+                CmdEmpresa.Enabled = True
+            Else
+                CmdEmpresa.Enabled = False
+            End If
+            If p.Cells(i, 10) = "1" Then
+                CmdConfig.Enabled = True
+            Else
+                CmdConfig.Enabled = False
+            End If
+            If p.Cells(i, 11) = "1" Then
+                CmdInventario.Enabled = True
+            Else
+                CmdInventario.Enabled = False
+            End If
+            Exit Sub
+        End If
+    Next i
+End Sub
+
+Private Sub CmdGuardaTC_Click()
+    Set a = Sheets("Catalogos")
+    uf = a.Range("K" & Rows.Count).End(xlUp).Row + 1
+    Dim Fecc As Date
+    Fecc = Format(LblFechaHoy, "dd/mm/yyyy")
+    For i = 2 To uf
+        fecTC = a.Cells(i, 11)
+        TC = a.Cells(i, 12)
+        If fecTC = Fecc Then 'Cambio ============
+            Worksheets("Catalogos").Unprotect Password:="***"
+            a.Cells(i, 11) = Fecc
+            a.Cells(i, 12) = FormatNumber(TxtTipoCambio, 2)
+            Worksheets("Catalogos").Protect Password:="***"
+            Call BuscaTC
+            Exit Sub
+        End If
+    Next i
+    Worksheets("Catalogos").Unprotect Password:="***"
+    a.Cells(uf, 11) = Fecc
+    a.Cells(uf, 12) = FormatNumber(TxtTipoCambio, 2)
+    Worksheets("Catalogos").Protect Password:="***"
+    Call BuscaTC
+End Sub
+
+Private Sub CmdID_Click()
+    Call IdProducto
+    TxtID = NumID
+    TxtID.Enabled = True
+End Sub
+Sub IdProducto()
+     ' ACTUALIZA ID
+    Set p = Sheets("Articulos")
+    uf = p.Range("G" & Rows.Count).End(xlUp).Row + 1
+    ValInicial = p.Cells(2, 2)
+    For i = 2 To uf
+        ID = p.Cells(i, 2).Value
+        If (ValInicial) = "" Then
+            NumID = 1
+            TxtID = NumID
+        ElseIf ID = ValInicial Then
+            NumID = ValInicial + 1
+            TxtID = NumID
+        ElseIf Val(ID) > Val(ValInicial) Then
+            ValInicial = ID
+            NumID = ValInicial + 1
+            TxtID = NumID
+        Else
+        End If
+    Next i
+End Sub
+
+Private Sub CmdImprimir_Click()
+    Application.ScreenUpdating = True
+    resultado = MsgBox("¿Desea imprimir el documento?", vbYesNo + vbQuestion, "Sistema Punto de Venta")
+    Select Case resultado
+    Case vbYes:
+        Sheets("Inventario").Select
+        ActiveWindow.SelectedSheets.PrintOut Copies:=1, Collate:=True, _
+        IgnorePrintAreas:=False
+    Case vbNo:
+        Close
+     End Select
+End Sub
+
+Private Sub CmdInicial_Click()
+    Dim FechaHoy As Date
+    FechaHoy = LblFechaHoy
+    Set b = Sheets("MovCaja")
+    uf = b.Range("A" & Rows.Count).End(xlUp).Row + 1
+    If TxtInicial <= 0 Or TxtInicial = "" Then
+        MsgBox ("Es necesario escribir una cantidad para guardar"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+        Exit Sub
+    Else
+        'Guarda Saldo inicial
+        Worksheets("MovCaja").Unprotect Password:="***"
+        b.Cells(uf, 1).Value = FechaHoy
+        b.Cells(uf, 2).Value = "INICIAL"
+        b.Cells(uf, 3).Value = FormatNumber(TxtInicial, 2)
+        Worksheets("MovCaja").Protect Password:="***"
+    End If
+    MsgBox ("Saldo inicial guardado"), vbOKOnly + vbExclamation, "Aviso"
+    TxtInicial.Enabled = False
+End Sub
+
+Private Sub CmdIniciar_Click()
+    If TxtUser.Text = "" Or TxtPassw.Text = "" Then 'Validad si los campos estan vacios
+        MsgBox "Campo de usuario y/o contraseña obligatorios", vbExclamation, "Sistema Punto de Venta"
+        TxtUser.SetFocus 'El cursor de mouse se posiciona en el campo Usuario
+        Exit Sub
+    End If
+    'Busca Usuario
+    Set u = Sheets("Usuarios")
+    uf = u.Range("B" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf 'Ciclo o bucle
+        usuario = u.Cells(i, 2)
+        pass = u.Cells(i, 3)
+        Status = u.Cells(i, 8)
+        If usuario = TxtUser And pass = TxtPassw And Status = "ACTIVO" Then
+            Call Privilegios
+            Frame51.Visible = False
+            LblSombraLogin.Visible = False
+            LblUser = TxtUser.Value
+            CmdOpciones.Visible = True
+            Exit Sub
+        Else
+            MsgBox "Acceso denegado, usuario o contraseña incorrectos", vbExclamation, "Sistema Punto de Venta"
+            TxtUser.SetFocus
+            Exit Sub
+        End If
+    Next i
+
+End Sub
+
+Private Sub CmdInicio_Click()
+    Me.MultiPage1.Value = 0
+    MultiPage1.Pages(0).Enabled = True
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdInventario_Click()
+    Me.MultiPage1.Value = 10
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = True
+    
+    CmdCaja.BackColor = RGB(192, 192, 192) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(0, 0, 0) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(64, 64, 64)
+    CmdInventario.ForeColor = RGB(255, 255, 255)
+    
+    TxtFecInv = LblFechaHoy
+    
+    Call GeneraInventarioActual
+    
+    Call CargaListboxInv
+
+End Sub
+Sub CargaListboxInv()
+    'Carga Listbox
+    Set a = Sheets("Inventario")
+    ufc = a.Range("F" & Rows.Count).End(xlUp).Row
+    Dim Entradas As Integer
+    LstInventario.Clear
+    LstInventario.ColumnCount = 5
+    LstInventario.ColumnWidths = "60;294;56;65;75"
+    For i = 4 To ufc
+        ID = a.Cells(i, 2)
+        If ID <> "" Then
+            LstInventario.AddItem a.Cells(i, 2)
+            LstInventario.List(LstInventario.ListCount - 1, 1) = a.Cells(i, 3)
+            Entradas = FormatNumber(a.Cells(i, 4), 0)
+            Lng1 = Len(Entradas)
+            Salidas = FormatNumber(a.Cells(i, 5), 0)
+            Lng2 = Len(Salidas)
+            Existencia = FormatNumber(a.Cells(i, 6), 0)
+            Lng3 = Len(Existencia)
+            If Lng1 <= 3 Then
+                LstInventario.List(LstInventario.ListCount - 1, 2) = Entradas
+                Imp1 = Trim((Entradas))
+                LstInventario.List(LstInventario.ListCount - 1, 2) = Space(10 - 2 * Len(Imp1)) & Imp1
+            End If
+            If Lng2 <= 3 Then
+                LstInventario.List(LstInventario.ListCount - 1, 3) = Salidas
+                Imp2 = Trim((Salidas))
+                LstInventario.List(LstInventario.ListCount - 1, 3) = Space(10 - 2 * Len(Imp2)) & Imp2
+            End If
+            If Lng3 <= 3 Then
+                LstInventario.List(LstInventario.ListCount - 1, 4) = Existencia
+                Imp3 = Trim((Existencia))
+                LstInventario.List(LstInventario.ListCount - 1, 4) = Space(10 - 2 * Len(Imp3)) & Imp3
+            End If
+        End If
+    Next i
+    TxtNomArt.Enabled = True
+    CmdImprimir.Enabled = True
+End Sub
+
+Private Sub CmdLimpCompra_Click()
+    Call LimpiaCompras
+End Sub
+
+Private Sub CmdLimpiarInv_Click()
+    Set b = Sheets("Inventario")
+    uff = Application.CountA(Sheets("Inventario").Range("A:A")) + 1
+    'Worksheets("Inventario").Unprotect Password:="***"
+    Worksheets("Inventario").Range("A2:C" & uff).ClearContents
+    LstInventario.Clear
+    TxtFecInv = ""
+    TxtNomArt.Enabled = False
+    CmdImprimir.Enabled = False
+    'Worksheets("Inventario").Protect Password:="***"
+End Sub
+
+Private Sub CmdLimpProd_Click()
+    Call LimpiarProd
+    CmdRegProd.Enabled = True
+    CmdModifProd.Enabled = False
+    LstPac.Visible = False
+End Sub
+
+Private Sub CmdLimpProv_Click()
+    If MsgBox("¿Desea limpiar los campos del formulario?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then
+        Exit Sub
+    Else
+        Call LimpiarProv
+        Call IdProveed
+        CmdRegProv.Enabled = True
+        CmdModifProv.Enabled = False
+        cmdElimClPr.Enabled = False
+    End If
+End Sub
+
+Private Sub CmdLimpUser_Click()
+    Call LimpiaUsuarios
+    Call CargaUsuarios
+End Sub
+
+Private Sub CmdModifCat_Click()
+Dim Categ As String
+    Set b = Sheets("Catalogos")
+    uf = b.Range("C" & Rows.Count).End(xlUp).Row + 1
+    For i = 2 To uf
+        Categ = b.Cells(i, 3)
+        If Categ = CmbCategoria.Text Then
+            Worksheets("Catalogos").Unprotect Password:="***"
+            b.Cells(i, 3) = "" 'Elimina la categoría
+            Worksheets("Catalogos").Protect Password:="***"
+            MsgBox ("La categoría se eliminó con éxito"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Call OrdenaCat
+            Call Categoria
+            Exit Sub
+        End If
+    Next i
+End Sub
+
+Private Sub CmdModifMarca_Click()
+    Sheets("Catalogos").Select
+    Set b = Sheets("Catalogos")
+    uf = b.Range("E" & Rows.Count).End(xlUp).Row + 1
+    For i = 2 To uf 'Busca si la Marca existe para no duplicarla
+        Marc = b.Cells(i, 5)
+        If Marc Like CmbMarca.Value & "*" Then
+            Worksheets("Catalogos").Unprotect Password:="***"
+            b.Cells(i, 5) = "" 'Elimina Marca
+            Worksheets("Catalogos").Protect Password:="***"
+            MsgBox ("Marca modificada con éxito"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Call OrdenaMarca
+            Call Marca
+            Exit Sub
+        End If
+    Next i
+    
+End Sub
+
+Private Sub CmdModifProd_Click()
+LstPac.Visible = False
+Dim FechaHoy As Date: Dim Pventa As Double
+    FechaHoy = Format(Now, "dd/mm/yyyy")
+    Set b = Sheets("Articulos")
+    uf = b.Range("C" & Rows.Count).End(xlUp).Row + 1
+    
+    If Artic = TxtArtic And Status = "INACTIVO" Then 'Valida en nombre y status del producto
+        MsgBox ("El articulo esta inactivo no se puede modificar"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+        Exit Sub
+    End If
+    
+    If Val(TxtVenta) < Val(TxtCosto) Then 'Valida si el precio de venta es menor al precio de compra
+        If MsgBox("El precio de Venta es menor al precio de compra, desea continuar?", vbYesNo + vbExclamation, "Sistema Punto de Venta") = vbNo Then
+            Exit Sub
+        End If
+    End If
+    
+    If TxtExist = "" Or TxtCosto = "" Then 'Valida que la existencia y precio de costo no este vacio
+        MsgBox ("No existe el producto disponible para asignar precio"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+        Exit Sub
+    ElseIf TxtID = "" Or TxtArtic = "" Or TxtVenta = "" Or CmbCategoria = "" Or CmbMarca = "" Then 'Valida que todos los campos tengan datos
+        MsgBox ("Faltan datos, no se puede procesar su petición"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+        Exit Sub
+    ElseIf MsgBox("¿Desea modificar el Articulo?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then 'Pregunta si desea continuar
+        Exit Sub
+    Else
+        For i = 2 To uf
+            Artic = b.Cells(i, 3)
+            Status = b.Cells(i, 12)
+            If Artic = TxtArtic And Status = "ACTIVO" Then
+                Worksheets("Articulos").Unprotect Password:="***"
+                b.Cells(i, 1) = FechaHoy
+                b.Cells(i, 2) = TxtID
+                b.Cells(i, 3) = TxtArtic
+                b.Cells(i, 4) = TxtVenta
+                b.Cells(i, 5) = CmbCategoria
+                b.Cells(i, 6) = CmbMarca
+                b.Cells(i, 7) = FormatNumber(TxtPrecMayoreo, 2)
+                b.Cells(i, 8) = TxtNumArtMay
+                b.Cells(i, 9) = TxtDesc
+                b.Cells(i, 10) = TxtVigDe
+                b.Cells(i, 11) = TxtVigA
+                b.Cells(i, 12) = "ACTIVO"
+                b.Cells(i, 13) = CmbTalla
+                b.Cells(i, 14) = CmbColor
+                b.Cells(i, 15) = TxtStockMin
+                Worksheets("Articulos").Protect Password:="***"
+                Call LimpiarProd
+                Exit For
+            End If
+        Next i
+        'Modifica en el historial de precio de venta
+        Set h = Sheets("HistArtic")
+        ufh = b.Range("C" & Rows.Count).End(xlUp).Row + 1
+        For j = 2 To ufh
+            histArtic = h.Cells(j, 3)
+            Pventa = h.Cells(j, 4)
+            If histArtic = TxtArtic Then 'Valida si el articulo es el mismo que esta modificando
+                If Val(Pventa) = Val(TxtVenta) Or Val(Pventa) = 0 Then 'Valida si el precio de venta anterior sea igual al precio de venta actual o el precio de venta anterior sea igual a cero
+                    Worksheets("HistArtic").Unprotect Password:="***"
+                    h.Cells(j, 1) = FechaHoy
+                    h.Cells(j, 2) = TxtID
+                    h.Cells(j, 3) = TxtArtic
+                    h.Cells(j, 4) = TxtVenta
+                    Worksheets("HistArtic").Protect Password:="***"
+                    Call LimpiarProd
+                    Call IdProducto
+                    TxtID = NumID
+                    CmdRegProd.Enabled = True
+                    CmdModifProd.Enabled = False
+                    TxtArtic.SetFocus
+                    MsgBox ("Artículo modificado con éxito"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+                    ActiveWorkbook.Save
+                    Exit Sub
+                ElseIf Val(Pventa) <> Val(TxtVenta) And Val(Pventa) > 0 Then 'Valida que si el precio de venta anterior es diferente al precio de venta actual y el precio de venta anterior sea mayor a cero
+                    Worksheets("HistArtic").Unprotect Password:="***"
+                    h.Cells(ufh, 1) = FechaHoy
+                    h.Cells(ufh, 2) = TxtID
+                    h.Cells(ufh, 3) = TxtArtic
+                    h.Cells(ufh, 4) = TxtVenta
+                    Worksheets("HistArtic").Protect Password:="***"
+                    Call LimpiarProd
+                    Call IdProducto
+                    TxtID = NumID
+                    CmdRegProd.Enabled = True
+                    CmdModifProd.Enabled = False
+                    TxtArtic.SetFocus
+                    MsgBox ("Artículo modificado con éxito"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+                    ActiveWorkbook.Save
+                    Exit For
+                End If
+            End If
+        Next j
+    End If
+End Sub
+
+Private Sub CmdModifProv_Click()
+    Set b = Sheets("Clientes_Proveedores")
+    uf = b.Range("C" & Rows.Count).End(xlUp).Row + 1
+    If TxtNombreProv = "" Or TxtRFCProv = "" Or TxtDomProv = "" Or TxtTelProv = "" Then
+        MsgBox ("Faltan datos, no se puede procesar su petición"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+        Exit Sub
+    ElseIf MsgBox("¿Desea modificar el Proveedor?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then
+        Exit Sub
+    Else
+        For i = 2 To uf
+            IDProv = b.Cells(i, 2)
+            NombrePrv = b.Cells(i, 3)
+            If IDProv = TxtIDProv Then
+                Worksheets("Clientes_Proveedores").Unprotect Password:="***"
+                b.Cells(i, 4) = TxtNombreProv
+                b.Cells(i, 5) = TxtRFCProv
+                b.Cells(i, 6) = TxtDomProv
+                b.Cells(i, 7) = TxtTelProv
+                b.Cells(i, 8) = TxtContactoProv
+                Call LimpiarProv
+                Call IdProveed
+                CmdRegProv.Enabled = True
+                CmdModifProv.Enabled = False
+                cmdElimClPr.Enabled = False
+                Worksheets("Clientes_Proveedores").Protect Password:="***"
+                ActiveWorkbook.Save
+                Exit Sub
+            End If
+        Next i
+    End If
+End Sub
+
+Private Sub CmdModifUser_Click()
+    Set u = Sheets("Usuarios")
+    uf = u.Range("B" & Rows.Count).End(xlUp).Row + 1
+    If MsgBox("Desea modificar el registro actual?", vbYesNo + vbQuestion, "Sistema Punto de Venta") = vbNo Then
+        Exit Sub
+    Else
+        For i = 2 To uf
+            usuario = u.Cells(i, 2)
+            If CmbUser = usuario Then 'Cuando encuentra el usuario guarda la modificacion
+                Worksheets("Usuarios").Unprotect Password:="***"
+                'u.Cells(i, 2) = CmbUser
+                u.Cells(i, 3) = TxtPass
+                u.Cells(i, 4) = TxtNomUser
+                u.Cells(i, 5) = Txtemailuser
+                u.Cells(i, 6) = TxtTelUser
+                u.Cells(i, 7) = TxtDomUser
+                Worksheets("Usuarios").Protect Password:="***"
+                ActiveWorkbook.Save
+                Call GuardaPriv
+                Call LimpiaUsuarios
+                Call CargaUsuarios
+                Exit For
+            End If
+        Next i
+    End If
+End Sub
+
+Private Sub CmdNvaVta_Click()
+    Call LimpiaVentas
+End Sub
+Sub LimpiaVentas()
+    TxtArticCaja = ""
+    TxtCant = "0"
+    TxtPrecioVta = "0.00"
+    TxtRecibido = "0.00"
+    TxtCambio = "0.00"
+    TxtTotVenta = "0.00"
+    TxtCliente = ""
+    TxtIDArtc = ""
+    LstCaja.Clear
+    TxtCliente = ""
+    LblTalla = ""
+    LblColor = ""
+    TxtEquivTC = "0"
+    TxtDsctoUSD = "0"
+    OptEfectivo.Value = True
+    OptTarjeta.Value = False
+    OptCredito.Value = False
+    LblTalla.Visible = False
+    LblColor.Visible = False
+End Sub
+Private Sub CmdOpciones_Click()
+    LblCambiarUser.Visible = True
+    LblCerrarSesion.Visible = True
+End Sub
+
+Private Sub CmdParcial_Click()
+Dim FechaHoy As Date
+FechaHoy = LblFechaHoy
+    Set b = Sheets("MovCaja")
+    uf = b.Range("A" & Rows.Count).End(xlUp).Row + 1
+    If TxtInicial <= 0 Or TxtInicial = "" Then
+        MsgBox ("Es necesario escribir una cantidad para guardar"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+        Exit Sub
+    Else
+        'Guarda corte parcial
+        Worksheets("MovCaja").Unprotect Password:="***"
+        b.Cells(uf, 1).Value = FechaHoy
+        b.Cells(uf, 2).Value = "CORTE"
+        b.Cells(uf, 3).Value = FormatNumber(TxtCorte, 2)
+        Worksheets("MovCaja").Protect Password:="***"
+    End If
+    MsgBox ("Corte parcial del dia guardado"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+End Sub
+
+Private Sub CmdRegCompras_Click()
+    Set b = Sheets("Compras")
+    uf = b.Range("B" & Rows.Count).End(xlUp).Row + 1
+    If TxtFechCompra = "" Or TxtFactCompra = "" Or TxtTotCompra = "" Or CmbFormaPago = "" Then
+        MsgBox ("Faltan datos, no se puede procesar su petición"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+        Exit Sub
+    ElseIf CDbl(TxtTotCompra) <> CDbl(TxtSumFact) Then
+        MsgBox ("El Total de la Factura y la suma de articulos no es la misma"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+        Exit Sub
+    ElseIf MsgBox("¿Desea guardar el registro?", vbExclamation + vbYesNo) = vbNo Then
+        Exit Sub
+    Else
+        For i = 2 To uf
+            Fact = b.Cells(i, 2)
+            'Guarda Factura en la hoja Compras
+            Worksheets("Compras").Unprotect Password:="***"
+            b.Cells(uf, 1) = TxtFechCompra
+            b.Cells(uf, 2) = TxtFactCompra
+            b.Cells(uf, 3) = FormatNumber(TxtTotCompra, 2)
+            b.Cells(uf, 4) = CmbProveedor
+            b.Cells(uf, 5) = CmbFormaPago
+            Worksheets("Compras").Protect Password:="***"
+            'Guarda Articulos en la hoja ComprasDetalle, si no existe el articulo lo guarda en Catalogos
+            For X = 0 To LstCompras.ListCount - 1
+                Worksheets("ComprasDetalle").Unprotect Password:="***"
+                Set C = Sheets("ComprasDetalle")
+                ufc = C.Range("B" & Rows.Count).End(xlUp).Row + 1
+                IDart = LstCompras.List(X, 0)
+                NombreArt = LstCompras.List(X, 1)
+                C.Cells(ufc, 1).Value = TxtFechCompra
+                C.Cells(ufc, 2).Value = TxtFactCompra
+                C.Cells(ufc, 3).Value = LstCompras.List(X, 0)
+                C.Cells(ufc, 4).Value = LstCompras.List(X, 1)
+                C.Cells(ufc, 5).Value = LstCompras.List(X, 2)
+                C.Cells(ufc, 6).Value = FormatNumber(LstCompras.List(X, 3), 2)
+                C.Cells(ufc, 7).Value = FormatNumber(LstCompras.List(X, 4), 2)
+            Next X
+                Call LimpiaCompras
+                Worksheets("ComprasDetalle").Protect Password:="***"
+                ActiveWorkbook.Save
+                Exit Sub
+        Next i
+    End If
+End Sub
+Sub LimpiaCompras()
+    TxtFechCompra = ""
+    TxtFechCompra.Enabled = True
+    TxtFactCompra = ""
+    TxtFactCompra.Enabled = True
+    TxtTotCompra = ""
+    TxtTotCompra.Enabled = True
+    CmbProveedor = ""
+    CmbProveedor.Enabled = True
+    CmbFormaPago = ""
+    CmbFormaPago.Enabled = True
+    TxtIDArt = ""
+    TxtNombreArtic = ""
+    TxtNumArts = ""
+    TxtPrecioCosto = ""
+    TxtSumFact = "0.00"
+    LstCompras.Clear
+    CmdRegCompras.Enabled = True
+End Sub
+
+Private Sub CmdRegProd_Click()
+    'Guarda en Articulo
+    Dim Fecc As Date
+    Fecc = Format(TxtFecProd, "dd/mm/yyyy")
+    Call BuscArtic
+    Set b = Sheets("Articulos")
+    uf = b.Range("A" & Rows.Count).End(xlUp).Row + 1
+    If TxtID = "" Or TxtArtic = "" Or TxtVenta = "" Or CmbCategoria = "" Or CmbMarca = "" Then 'Valida que todos los campos obligatorios tengan datos
+        MsgBox ("Faltan datos, no se puede procesar su petición"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+        Exit Sub
+    ElseIf MsgBox("¿Desea guardar el registro?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then 'Pregunta si desea guardar
+        Exit Sub
+    Else
+        Worksheets("Articulos").Unprotect Password:="***"
+        b.Cells(uf, 1) = Fecc
+        b.Cells(uf, 2) = TxtID
+        b.Cells(uf, 3) = TxtArtic
+        b.Cells(uf, 4) = TxtVenta
+        b.Cells(uf, 5) = CmbCategoria
+        b.Cells(uf, 6) = CmbMarca
+        b.Cells(uf, 7) = TxtPrecMayoreo
+        b.Cells(uf, 8) = TxtNumArtMay
+        b.Cells(uf, 9) = TxtDesc
+        b.Cells(uf, 10) = TxtVigDe
+        b.Cells(uf, 11) = TxtVigA
+        b.Cells(uf, 12) = "ACTIVO"
+        b.Cells(uf, 13) = CmbTalla
+        b.Cells(uf, 14) = CmbColor
+        b.Cells(uf, 15) = TxtStockMin
+        Worksheets("Articulos").Protect Password:="***"
+        
+        'Guarda el historial de precio de venta
+        Set h = Sheets("HistArtic")
+        ufh = h.Range("C" & Rows.Count).End(xlUp).Row + 1
+        Worksheets("HistArtic").Unprotect Password:="***"
+        h.Cells(ufh, 1) = Fecc
+        h.Cells(ufh, 2) = TxtID
+        h.Cells(ufh, 3) = TxtArtic
+        h.Cells(ufh, 4) = TxtVenta
+        Worksheets("HistArtic").Protect Password:="***"
+    End If
+        Call IdProducto
+        Call LimpiarProd
+End Sub
+Sub LimpiarProd()
+    TxtArtic = ""
+    CmbCategoria = "Sin Categoria"
+    CmbMarca = "Sin Marca"
+    TxtVenta = ""
+    CmbTalla = ""
+    CmbColor = ""
+    TxtStockMin = ""
+    TxtPrecMayoreo = "0.00"
+    TxtNumArtMay = "0"
+    TxtDesc = "0"
+    TxtVigDe = "01/01/1900"
+    TxtVigA = "01/01/1900"
+    TxtExist = "0"
+    TxtCosto = "0.00"
+    TxtFecProd = Format(Now, "dd/mmm/yyyy")
+    LstPac.Visible = False
+    LblArtElim = ""
+    CmdModifProd.Enabled = False
+    CmdEliminarArt.Enabled = False
+End Sub
+Private Sub CmdRegProv_Click()
+    Set b = Sheets("Clientes_Proveedores")
+    uf = b.Range("A" & Rows.Count).End(xlUp).Row + 1
+    'Verifica que boton de opciones esta seleccionado
+    If OptCliente.Value = True Then
+    Else
+        If OptProv.Value = True Then
+        Else
+            MsgBox ("Seleccione Cliente o Proveedor para continuar"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+            Exit Sub
+        End If
+    End If
+    If TxtIDProv = "" Or TxtNombreProv = "" Or TxtRFCProv = "" Or TxtDomProv = "" Or TxtTelProv = "" Then
+        MsgBox ("Faltan datos, no es posible procesar su petición"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+        Exit Sub
+    ElseIf MsgBox("¿Desea guardar el registro?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then
+        Exit Sub
+    Else
+        'Busca si existe el proveedor
+        For i = 2 To uf
+            Prov = b.Cells(i, 2)
+            If Prov = TxtNombreProv Then
+                MsgBox ("El Proveedor ya existe, no es posible guardarlo nuevamente"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+                Exit Sub
+            End If
+        Next i
+            Worksheets("Clientes_Proveedores").Unprotect Password:="***"
+            b.Cells(uf, 1) = TxtFechaProv
+            b.Cells(uf, 2) = TxtIDProv
+            If OptCliente.Value = True Then
+                b.Cells(uf, 3) = "CLIENTE"
+            ElseIf OptProv.Value = True Then
+                b.Cells(uf, 3) = "PROVEEDOR"
+            End If
+            b.Cells(uf, 4) = TxtNombreProv
+            b.Cells(uf, 5) = TxtRFCProv
+            b.Cells(uf, 6) = TxtDomProv
+            b.Cells(uf, 7) = TxtTelProv
+            b.Cells(uf, 8) = TxtContactoProv
+            b.Cells(uf, 9) = "ACTIVO"
+            Call LimpiarProv
+            Call IdProveed
+            Worksheets("Clientes_Proveedores").Protect Password:="***"
+            ActiveWorkbook.Save
+        End If
+End Sub
+Sub LimpiarProv()
+    TxtIDProv = ""
+    TxtNombreProv = ""
+    TxtRFCProv = ""
+    TxtDomProv = ""
+    TxtTelProv = ""
+    TxtContactoProv = ""
+    OptCliente.Value = False
+    OptProv.Value = False
+End Sub
+Sub IdProveed()
+     ' ACTUALIZA ID
+    Dim ValInicial As Integer
+    Set p = Sheets("Clientes_Proveedores")
+    uf = p.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 1 To uf
+        ID = p.Cells(i, 2).Value
+        If ID = "" Or ID = "ID" Then
+            TxtIDProv = 1
+        Else
+            TxtIDProv = ID + 1
+        End If
+    Next i
+End Sub
+Private Sub CmdReportes_Click()
+    Me.MultiPage1.Value = 6 '
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = True
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(0, 0, 0) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(64, 64, 64)
+    CmdReportes.ForeColor = RGB(255, 255, 255)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdTalla_Click()
+Dim nTalla As String
+    Sheets("Catalogos").Select
+    Set C = Sheets("Catalogos")
+    uf = C.Range("G" & Rows.Count).End(xlUp).Row + 1
+    For i = 2 To uf 'Busca si la talla existe para no duplicarla
+        nTalla = C.Cells(i, 7)
+        If nTalla = CmbTalla.Text Then
+            MsgBox ("La talla ya existe, no se puede agregar"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Exit Sub
+        End If
+    Next i
+    Worksheets("Catalogos").Unprotect Password:="***"
+    C.Cells(uf, 7) = CmbTalla.Text 'en caso de que no exista la talla la agrega
+    Worksheets("Catalogos").Protect Password:="***"
+    MsgBox ("La talla dada de alta con éxito"), vbOKOnly + vbCritical, "Sistema Punto de Venta"
+    Call Talla
+End Sub
+Sub Talla()
+    'Categoria
+    Dim Talla As String
+    CmbTalla.Clear
+    Set C = Sheets("Catalogos")
+    uf = C.Range("G" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        nTalla = C.Cells(i, 7)
+        CmbTalla.AddItem nTalla
+    Next i
+    CmbTalla.Text = ""
+End Sub
+
+Private Sub CmdTC_Click()
+    TxtTipoCambio.Enabled = True
+End Sub
+
+Private Sub CmdUsuarios_Click()
+    Me.MultiPage1.Value = 7
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = True
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(0, 0, 0) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(64, 64, 64)
+    CmdUsuarios.ForeColor = RGB(255, 255, 255)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+    
+    Call CargaUsuarios
+    
+End Sub
+
+Private Sub TxtNomUserr_Change()
+    TxtNomUser.Text = UCase(TxtNomUser.Text)
+End Sub
+
+
+Private Sub Frame23_Click()
+    LstPac.Visible = False
+End Sub
+
+Private Sub Frame36_Click()
+    LstBuscaProd.Visible = False
+End Sub
+
+Private Sub Frame4_Click()
+    LstBuscaProd.Visible = False
+End Sub
+
+Private Sub Frame5_Click()
+    LstPac.Visible = False
+End Sub
+
+Private Sub Frame52_Click()
+    LstArticCaja.Visible = False
+    LstCliente.Visible = False
+End Sub
+
+Private Sub Frame7_Click()
+    LblCambiarUser.Visible = False
+    LblCerrarSesion.Visible = False
+End Sub
+
+Private Sub LblCambiarUser_Click()
+    If MsgBox("Desea Cerrar e ingresar con nuevo usuario?", vbYesNo + vbQuestion, "Sistema Punto de Venta") = vbNo Then
+        LblCambiarUser.Visible = False
+        LblCerrarSesion.Visible = False
+    Else
+        Unload Me 'cierra el sistema
+        PuntoVenta.Show 'cargar sistema
+    End If
+End Sub
+
+Private Sub LblCerrarSesion_Click()
+    If MsgBox("Desea salir de la aplicación?", vbYesNo + vbQuestion, "Sistema Punto de Venta") = vbNo Then
+        LblCambiarUser.Visible = False
+        LblCerrarSesion.Visible = False
+        Exit Sub
+    Else
+        Unload Me ' cierra el sistema
+    End If
+End Sub
+
+Private Sub LbpProm_Click()
+    LstArticCaja.Visible = False
+End Sub
+
+Private Sub LstArticCaja_Click()
+    TxtEquivTC = "0"
+    TxtDsctoUSD = "0"
+    Set b = Sheets("Articulos")
+    uf = b.Range("C" & Rows.Count).End(xlUp).Row
+    nombreselect = LstArticCaja.List(LstArticCaja.ListIndex, 0)
+    For i = 2 To uf
+        IDAticulo = b.Cells(i, 2)
+        Artic = b.Cells(i, 3)
+        PrcioVenta = b.Cells(i, 4)
+        Status = b.Cells(i, 12)
+        If UCase(Artic) = UCase(nombreselect) And Status = "ACTIVO" Then
+            'valida que el precio de venta este establecido
+            If PrcioVenta = 0 Then
+                MsgBox ("El producto no tiene precio de venta"), vbOKOnly + vbCritical, "Sistema Punto de Venta - Advertencia"
+                TxtArticCaja = ""
+                TxtCant = ""
+                Exit Sub
+            End If
+            TxtArticCaja = Artic
+            TxtPrecioVta = Format(PrcioVenta, "##,##0.00#")
+            TxtIDArtc = IDAticulo
+            Dim nTalla As String
+            nTalla = b.Cells(i, 13)
+            If nTalla <> "" Then
+                LblTalla = "Talla: " & b.Cells(i, 13)
+            Else
+                LblTalla = ""
+            End If
+            nColor = b.Cells(i, 13)
+            If nColor <> "" Then
+                LblColor = "Color: " & b.Cells(i, 14)
+            Else
+                LblColor = ""
+            End If
+            LstArticCaja.Visible = False
+            
+            Exit For
+        End If
+    Next i
+    'Busca existencia en el inventario
+    Set C = Sheets("Inventario")
+    uf = C.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 4 To uf
+        Artic = C.Cells(i, 3)
+        Invent = C.Cells(i, 6)
+        If Artic = nombreselect Then
+            TxtExistInv = Invent
+            LstArticCaja.Visible = False
+            TxtCant.SetFocus
+            Call stockMinimo
+            Exit Sub
+        End If
+    Next i
+End Sub
+
+Private Sub LstBuscaProd_Click()
+    Set C = Sheets("Articulos")
+    uf = C.Range("G" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        IDProd = C.Cells(i, 2)
+        Artic = C.Cells(i, 3)
+        nombreselect = LstBuscaProd.List(LstBuscaProd.ListIndex, 0)
+        If Artic = nombreselect Then
+            TxtIDArt = IDProd
+            TxtNombreArtic = Artic
+            LstBuscaProd.Visible = False
+            TxtNumArts.SetFocus
+            Exit Sub
+        End If
+    Next i
+End Sub
+
+Private Sub LstBuscFact_Click()
+    Set b = Sheets("Compras")
+    uf = b.Range("A" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        Fecfact = b.Cells(i, 1)
+        NFact = b.Cells(i, 2)
+        Impt = b.Cells(i, 3)
+        Prov = b.Cells(i, 4)
+        FormPag = b.Cells(i, 5)
+        Factselect = LstBuscFact.List(LstBuscFact.ListIndex, 0)
+        If Val(NFact) = Val(Factselect) Then
+            TxtFechCompra = Fecfact
+            TxtFechCompra.Enabled = False
+            TxtFactCompra = NFact
+            TxtFactCompra.Enabled = False
+            TxtTotCompra = Impt
+            TxtTotCompra.Enabled = False
+            CmbProveedor.Style = fmStyleDropDownCombo
+            CmbProveedor = b.Cells(i, 4)
+            CmbProveedor.Enabled = False
+            CmbFormaPago = FormPag
+            CmbFormaPago.Enabled = False
+            LstBuscFact.Visible = False
+            'Busca articulos en la hoja Comprasdetalle
+            LstCompras.Clear
+            Me.LstCompras.ColumnCount = 5
+            Me.LstCompras.ColumnWidths = "60;294;56;65;75"
+            Set C = Sheets("ComprasDetalle")
+            uf = C.Range("A" & Rows.Count).End(xlUp).Row
+            TxtSumFact = "0.00"
+            For X = 2 To uf
+                FactDet = C.Cells(X, 2)
+                IDArtic = C.Cells(X, 3)
+                nomArt = C.Cells(X, 4)
+                NumArt = C.Cells(X, 5)
+                Pcosto = C.Cells(X, 6)
+                Tot = C.Cells(X, 7)
+                If FactDet = TxtFactCompra Then
+                    LstCompras.Visible = True
+                    LstCompras.AddItem IDArtic
+                    LstCompras.List(LstCompras.ListCount - 1, 1) = nomArt
+                    LstCompras.List(LstCompras.ListCount - 1, 2) = NumArts
+                    LstCompras.List(LstCompras.ListCount - 1, 3) = FormatNumber(Pcosto, 2)
+                    LstCompras.List(LstCompras.ListCount - 1, 4) = FormatNumber(Tot, 2)
+                    TxtSumFact = FormatNumber(TxtSumFact + Tot, 2)
+                End If
+            Next X
+            CmdRegCompras.Enabled = False
+            CmdElimCompra.Enabled = True
+            LstCompras.Enabled = False
+            Exit Sub
+        End If
+    Next i
+End Sub
+
+Private Sub LstCaja_Click()
+    CmdElimArtVta.Enabled = True
+    LstArticCaja.Visible = False
+    LstCliente.Visible = False
+End Sub
+
+Private Sub LstCliente_Click()
+    Set p = Sheets("Clientes_Proveedores")
+    uf = p.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        Nombre = p.Cells(i, 4)
+        Tipo = p.Cells(i, 3)
+        nombreselect = LstCliente.List(LstCliente.ListIndex, 0)
+        If Tipo = "CLIENTE" And Nombre = nombreselect Then
+            TxtCliente = Nombre
+            LstCliente.Visible = False
+            Exit Sub
+        End If
+    Next i
+End Sub
+
+Private Sub LstCompras_Click()
+    LstBuscaProd.Visible = False
+    CmdElimArt.Enabled = True
+End Sub
+
+Private Sub LstPac_Click()
+    Set p = Sheets("Articulos")
+    uf = p.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        ID = p.Cells(i, 2)
+        NombreArtic = p.Cells(i, 3)
+        PrecioVenta = p.Cells(i, 4)
+        Status = p.Cells(i, 12)
+        nombreselect = LstPac.List(LstPac.ListIndex, 0)
+        If NombreArtic = nombreselect Then
+            TxtFecProd = p.Cells(i, 1)
+            TxtID = p.Cells(i, 2)
+            TxtArtic = p.Cells(i, 3)
+            TxtVenta = FormatNumber(p.Cells(i, 4), 2)
+            CmbCategoria = p.Cells(i, 5)
+            CmbMarca = p.Cells(i, 6)
+            TxtPrecMayoreo = FormatNumber(p.Cells(i, 7), 2)
+            TxtNumArtMay = FormatNumber(p.Cells(i, 8), 0)
+            TxtDesc = p.Cells(i, 9)
+            TxtVigDe = p.Cells(i, 10)
+            TxtVigA = p.Cells(i, 11)
+            If p.Cells(i, 12) = "INACTIVO" Then
+                LblArtElim = p.Cells(i, 12)
+            Else
+                LblArtElim = ""
+            End If
+            CmbTalla = p.Cells(i, 13)    'Se agrego   =======
+            CmbColor = p.Cells(i, 14)    'Se agrego   =======
+            TxtStockMin = p.Cells(i, 15)    'Se agrego   =======
+            Call BuscaExistencia 'Busca existencia del producto
+            Call BuscaPrecioCosto 'Busca el precio de costo
+            LstPac.Visible = False
+            CmdRegProd.Enabled = False
+            CmdModifProd.Enabled = True
+            Exit Sub
+        Else
+        
+        End If
+    Next i
+End Sub
+Sub BuscaExistencia()
+    'Busca existenca
+    Call GeneraInventarioActual
+    Set b = Sheets("Inventario")
+    uf = b.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 4 To uf
+        Artic = b.Cells(i, 3)
+        Invent = b.Cells(i, 6)
+        If Artic = TxtArtic Then
+            TxtExist = Invent
+            Exit For
+        End If
+    Next i
+
+End Sub
+Sub BuscaPrecioCosto()
+    'Busca el precio de costo en compras
+    Set C = Sheets("ComprasDetalle")
+    uf = C.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 4 To uf
+        fech = C.Cells(i, 1)
+        nomArt = C.Cells(i, 4)
+        Costo = C.Cells(i, 6)
+        If nomArt = TxtArtic Then
+            TxtCosto = FormatNumber(Costo, 2)
+            'Exit For
+        End If
+    Next i
+End Sub
+Private Sub LstProv_Click()
+    Set p = Sheets("Clientes_Proveedores")
+    uf = p.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        NombreProv = p.Cells(i, 4)
+        Tipo = p.Cells(i, 3)
+        Status = p.Cells(i, 9)
+        nombreselect = LstProv.List(LstProv.ListIndex, 0)
+        If NombreProv = nombreselect Then
+            TxtFechaProv = p.Cells(i, 1)
+            TxtIDProv = p.Cells(i, 2)
+            
+            If Tipo = "CLIENTE" Then
+                OptCliente.Value = True
+            ElseIf Tipo = "PROVEEDOR" Then
+                OptProv.Value = True
+            End If
+            TxtNombreProv = p.Cells(i, 4)
+            TxtRFCProv = p.Cells(i, 5)
+            TxtDomProv = p.Cells(i, 6)
+            TxtTelProv = p.Cells(i, 7)
+            TxtContactoProv = p.Cells(i, 8)
+            If Status = "INACTIVO" Then
+                LblInactivo = Status
+            Else
+                LblInactivo = ""
+            End If
+            LstProv.Visible = False
+            CmdRegProv.Enabled = False
+            CmdModifProv.Enabled = True
+            cmdElimClPr.Enabled = True
+            Exit Sub
+        End If
+    Next i
+End Sub
+Private Sub TxtArtic_Change()
+    TxtArtic.Text = UCase(TxtArtic.Text)
+    CmdRegProd.Enabled = False
+End Sub
+Private Sub CmdBuscaArt_Click()
+TxtVenta = ""
+TxtExist = "0.00"
+TxtCosto = "0.00"
+Call BuscArtic
+    TxtArtic.Text = UCase(TxtArtic.Text)
+    'Busca existenca
+    Call GeneraInventarioActual
+    Set b = Sheets("Inventario")
+    uf = b.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 4 To uf
+        Artic = b.Cells(i, 3)
+        Invent = b.Cells(i, 6)
+        If Artic = TxtArtic Then
+            TxtExist = Invent
+            Exit For
+        End If
+    Next i
+    'Busca el precio de costo en compras
+    Set C = Sheets("ComprasDetalle")
+    uf = C.Range("C" & Rows.Count).End(xlUp).Row
+    For X = 4 To uf
+        fech = C.Cells(X, 1)
+        nomArt = C.Cells(X, 4)
+        Costo = C.Cells(X, 6)
+        If nomArt = TxtArtic Then
+            TxtCosto = FormatNumber(Costo, 2)
+            Exit For
+        End If
+    Next X
+End Sub
+Sub BuscArtic()
+    'Creamos un Listbox
+    LstPac.Visible = False
+    LstPac.Height = 100
+    LstPac.Clear
+    LstPac.ColumnCount = 1
+    LstPac.ColumnWidths = "350"
+    'Buscar el articulo, si existe se agrega al Listbox
+    Set C = Sheets("Articulos")
+    uf = C.Range("B" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        Artic = C.Cells(i, 3)
+        If UCase(Artic) Like UCase(TxtArtic.Value) & "*" Then
+            LstPac.Visible = True
+            LstPac.AddItem Artic 'Agregarmos el articulo al Listobx
+        End If
+    Next i
+End Sub
+Private Sub TxtArtic_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtArtic.Text = WorksheetFunction.Trim(TxtArtic.Text)
+    TxtArtic.Text = LTrim(TxtArtic.Text)
+    'Busca en Catalogos, si existe lo consulta y si no esta lo guarda
+    Set C = Sheets("Articulos")
+    uf = C.Range("B" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        IDProd = C.Cells(i, 2)
+        Artic = C.Cells(i, 3)
+        If Artic = TxtArtic Then 'si existe
+            TxtID = IDProd
+            TxtVenta = FormatNumber(C.Cells(i, 4), 2)
+            CmbCategoria = C.Cells(i, 5)
+            CmbMarca = C.Cells(i, 6)
+            TxtPrecMayoreo = C.Cells(i, 7)
+            TxtNumArtMay = C.Cells(i, 8)
+            TxtDesc = C.Cells(i, 9)
+            TxtVigDe = C.Cells(i, 10)
+            TxtVigA = C.Cells(i, 11)
+            CmbTalla = C.Cells(i, 13)    'Se agrego   =======
+            CmbColor = C.Cells(i, 14)    'Se agrego   =======
+            CmdRegProd.Enabled = False
+            CmdModifProd.Enabled = True
+            LstPac.Visible = False
+            Exit Sub
+        End If
+    Next i
+    Call IdProducto
+    TxtVenta = ""
+    CmdRegProd.Enabled = True
+    CmdModifProd.Enabled = False
+    LstPac.Visible = False
+End Sub
+
+Private Sub TxtArticCaja_Change()
+    TxtArticCaja.Text = UCase(TxtArticCaja.Text)
+    LstArticCaja.Visible = False
+    LstArticCaja.Height = 100
+    LstArticCaja.Clear
+    LstArticCaja.ColumnCount = 1
+    LstArticCaja.ColumnWidths = "410"
+    Set C = Sheets("Articulos")
+    uf = C.Range("C" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        Artic = C.Cells(i, 3)
+        Status = C.Cells(i, 12)
+        If UCase(Artic) Like UCase(TxtArticCaja.Value) & "*" And Status = "ACTIVO" Then
+            LstArticCaja.Visible = True
+            LstArticCaja.AddItem Artic
+        End If
+    Next i
+    If LstArticCaja.Visible = False Then
+        MsgBox ("No existen coincidencia para buscar"), vbOKOnly + vbCritical, "Aviso"
+        TxtArticCaja = ""
+    End If
+End Sub
+
+Private Sub TxtCant_Change()
+
+End Sub
+
+Private Sub TxtCant_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtEquivTC = "0"
+    TxtDsctoUSD = "0"
+    Set a = Sheets("Articulos")
+    uf = a.Range("C" & Rows.Count).End(xlUp).Row
+    Dim fecini As Date: Dim fecfin As Date: Dim fechoy As Date
+    fechoy = LblFechaHoy
+'    'valida que la cantidad de articulos esta en cero o vacio
+'    If TxtCant = 0 Or TxtCant = "" Then
+'        MsgBox ("Capture la cantidad de articulos a vender"), vbOKOnly + vbCritical, "Sistema Punto de Venta - Advertencia"
+'        TxtCant.SetFocus
+'        Exit Sub
+'    End If
+    'valida si tiene precio de mayoreo
+    For i = 2 To uf
+        nombArt = a.Cells(i, 3)
+        pUnit = a.Cells(i, 4)
+        pMayoreo = a.Cells(i, 7)
+        nArts = a.Cells(i, 8)   'si tiene precio de mayoreo
+        If nombArt = TxtArticCaja And nArts > 0 Then
+            If Val(TxtCant) >= Val(nArts) And nArts <> "" Then
+                TxtPrecioVta = pMayoreo
+                If TxtTipoCambio = 0 Or TxtPrecioVta = "" Then
+                Else
+                    TxtEquivTC = FormatNumber(TxtPrecioVta / TxtTipoCambio, 2)
+                    If TxtDscto > 0 Then
+                        TxtDsctoUSD = FormatNumber(TxtDscto / TxtTipoCambio, 2)
+                    End If
+                End If
+
+            End If
+        Else
+        End If
+    Next i
+    If TxtTipoCambio = 0 Or TxtPrecioVta = "" Then
+    Else
+        TxtEquivTC = FormatNumber(TxtPrecioVta / TxtTipoCambio, 2)
+        If TxtDscto > 0 Then
+            TxtDsctoUSD = FormatNumber(TxtDscto / TxtTipoCambio, 2)
+        End If
+    End If
+    
+    'Valida si tiene descuento
+    For j = 2 To uf
+        fecini = "01/01/1900"
+        fecfin = "01/01/1900"
+        nombArt = a.Cells(j, 3)
+        Dscto = a.Cells(j, 9)
+        If a.Cells(j, 10) = "" Then
+        Else
+            fecini = a.Cells(j, 10)
+            fecfin = a.Cells(j, 11)
+        End If
+        If nombArt = TxtArticCaja Then
+            If fechoy >= fecini And fechoy <= fecfin Then
+                TxtDscto = FormatNumber(Val((TxtPrecioVta) * Val(TxtCant) * (Dscto) / 100), 2)
+                LbpProm = "Articulo en promocion con el " & Dscto & "% de descuento"
+                    If TxtDscto > 0 And TxtTipoCambio <> 0 Then
+                        TxtDsctoUSD = FormatNumber(TxtDscto / TxtTipoCambio, 2)
+                    End If
+                Exit For
+            Else
+                TxtPrecioVta = FormatNumber(TxtPrecioVta, 2)
+                Exit For
+            End If
+        End If
+    Next j
+End Sub
+
+Private Sub TxtCant_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii < 48 Or KeyAscii > 57 Then
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtCliente_Change()
+    LstArticCaja.Visible = False
+    TxtCliente.Text = UCase(TxtCliente.Text)
+End Sub
+
+Private Sub TxtContactoProv_Change()
+    TxtContactoProv.Text = LTrim(TxtContactoProv.Text)
+    TxtContactoProv = UCase(TxtContactoProv)
+End Sub
+
+Private Sub TxtContactoProv_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtContactoProv.Text = WorksheetFunction.Trim(TxtContactoProv.Text)
+End Sub
+
+Private Sub TxtCorte_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtCorte = FormatNumber(TxtCorte, 2)
+End Sub
+
+Private Sub TxtCorte_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii = 44 Or KeyAscii = 46 Or KeyAscii = 48 Or KeyAscii = 49 Or KeyAscii = 50 Or KeyAscii = 51 Or KeyAscii = 52 Or KeyAscii = 53 Or KeyAscii = 54 Or KeyAscii = 55 Or KeyAscii = 56 Or KeyAscii = 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtDesc_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii = 44 Or KeyAscii = 46 Or KeyAscii = 48 Or KeyAscii = 49 Or KeyAscii = 50 Or KeyAscii = 51 Or KeyAscii = 52 Or KeyAscii = 53 Or KeyAscii = 54 Or KeyAscii = 55 Or KeyAscii = 56 Or KeyAscii = 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtDomProv_Change()
+    TxtDomProv.Text = LTrim(TxtDomProv.Text)
+    TxtDomProv = UCase(TxtDomProv)
+End Sub
+
+Private Sub TxtDomProv_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtDomProv.Text = WorksheetFunction.Trim(TxtDomProv.Text)
+End Sub
+
+Private Sub TxtDomUser_Change()
+    TxtDomUser.Text = UCase(TxtDomUser.Text)
+End Sub
+
+Private Sub TxtDomUser_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtNomUser.Text = WorksheetFunction.Trim(TxtNomUser.Text)
+End Sub
+Private Sub TxtFactCompra_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    Set C = Sheets("Compras")
+    uf = C.Range("A" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        NFact = C.Cells(i, 2)
+        If NFact = TxtFactCompra Then
+            MsgBox ("El numero de Factura ingresado ya existe"), vbOKOnly + vbExclamation, "Sistema Punto de Venta"
+            TxtFactCompra = ""
+            TxtFactCompra.SetFocus
+            Exit Sub
+        End If
+    Next i
+End Sub
+
+Private Sub TxtFechCompra_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    If TxtFechCompra = "" Then
+        TxtFechCompra = ""
+    Else
+        If IsDate(TxtFechCompra) = False Then 'Si el dato ingresado en el campo no es fecha
+            MsgBox "El dato ingresado no es una fecha", vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Cancel = True
+            TxtFechCompra = ""
+        Else
+            TxtFechCompra = Format(CDate(TxtFechCompra), "dd/mm/yyyy")
+        End If
+    End If
+End Sub
+
+Private Sub TxtFechCompra_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii >= 47 And KeyAscii <= 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+Private Sub TxtFecInv_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    If TxtFecInv = "" Then
+        TxtFecInv = ""
+    Else
+        If IsDate(TxtFecInv) = False Then 'Si el dato ingresado en el campo no es fecha
+            MsgBox "El dato ingresado no es una fecha", vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Cancel = True
+            TxtFecInv = ""
+        Else
+            TxtFecInv = Format(CDate(TxtFecInv), "dd/mm/yyyy")
+        End If
+    End If
+End Sub
+
+Private Sub TxtFecInv_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii >= 47 And KeyAscii <= 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtFecProd_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii < 47 Or KeyAscii > 57 Then
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtInicial_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtInicial = FormatNumber(TxtInicial, 2)
+End Sub
+
+Private Sub TxtInicial_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii = 44 Or KeyAscii = 46 Or KeyAscii = 48 Or KeyAscii = 49 Or KeyAscii = 50 Or KeyAscii = 51 Or KeyAscii = 52 Or KeyAscii = 53 Or KeyAscii = 54 Or KeyAscii = 55 Or KeyAscii = 56 Or KeyAscii = 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtNomArt_Change()
+    TxtNomArt.Text = UCase(TxtNomArt.Text)
+    Set a = Sheets("Inventario")
+    uf = a.Range("A" & Rows.Count).End(xlUp).Row
+    Dim Entradas As Integer
+    LstInventario.Clear
+    LstInventario.ColumnCount = 5
+    LstInventario.ColumnWidths = "60;294;56;65;75"
+    For X = 4 To uf
+        nomArt = a.Cells(X, 3)
+        If UCase(nomArt) Like UCase(TxtNomArt.Value) & "*" Then
+            LstInventario.AddItem a.Cells(X, 2)
+            LstInventario.List(LstInventario.ListCount - 1, 1) = a.Cells(X, 3)
+            Entradas = FormatNumber(a.Cells(X, 4), 0)
+            Lng1 = Len(Entradas)
+            Salidas = FormatNumber(a.Cells(X, 5), 0)
+            Lng2 = Len(Salidas)
+            Existencia = FormatNumber(a.Cells(X, 6), 0)
+            Lng3 = Len(Existencia)
+            If Lng1 <= 3 Then
+                LstInventario.List(LstInventario.ListCount - 1, 2) = Entradas
+                Imp1 = Trim((Entradas))
+                LstInventario.List(LstInventario.ListCount - 1, 2) = Space(10 - 2 * Len(Imp1)) & Imp1
+            End If
+            If Lng2 <= 3 Then
+                LstInventario.List(LstInventario.ListCount - 1, 3) = Salidas
+                Imp2 = Trim((Salidas))
+                LstInventario.List(LstInventario.ListCount - 1, 3) = Space(10 - 2 * Len(Imp2)) & Imp2
+            End If
+            If Lng3 <= 3 Then
+                LstInventario.List(LstInventario.ListCount - 1, 4) = Existencia
+                Imp3 = Trim((Existencia))
+                LstInventario.List(LstInventario.ListCount - 1, 4) = Space(10 - 2 * Len(Imp3)) & Imp3
+            End If
+            
+        End If
+    Next X
+End Sub
+
+Private Sub TxtNombreArtic_Change()
+    TxtNombreArtic.Text = UCase(TxtNombreArtic.Text)
+    LstBuscaProd.Visible = False
+    LstBuscaProd.Height = 80
+    LstBuscaProd.Clear
+    LstBuscaProd.ColumnCount = 1
+    LstBuscaProd.ColumnWidths = "350"
+    Set C = Sheets("Articulos")
+    uf = C.Range("G" & Rows.Count).End(xlUp).Row
+    For i = 2 To uf
+        IDProd = C.Cells(i, 2)
+        Artic = C.Cells(i, 3)
+        Status = C.Cells(i, 12)
+        If UCase(Artic) Like UCase(TxtNombreArtic.Value) & "*" And Status = "ACTIVO" Then
+            LstBuscaProd.Visible = True
+            LstBuscaProd.AddItem Artic
+        End If
+    Next i
+End Sub
+
+Private Sub TxtNombreArtic_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtNombreArtic.Text = WorksheetFunction.Trim(TxtNombreArtic.Text)
+    TxtNombreArtic.Text = LTrim(TxtNombreArtic.Text)
+End Sub
+
+Private Sub TxtNombreProv_Change()
+    TxtNombreProv.Text = UCase(TxtNombreProv.Text)
+End Sub
+
+Private Sub TxtNombreProv_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtNombreProv.Text = WorksheetFunction.Trim(TxtNombreProv.Text)
+End Sub
+
+Private Sub TxtNombreProv_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+
+End Sub
+
+Private Sub TxtNomUser_Change()
+    'TxtNomUser.Text = UCase(TxtNomUser.Text) 'Cambia el texto a mayusculas
+    'TxtNomUser.Text = LCase(TxtNomUser.Text) 'Cambia el texto a minusculas
+    'TxtNomUser.Text = LTrim(TxtNomUser.Text) 'Quita espacios al principio
+    TxtNomUser.Text = WorksheetFunction.Proper(TxtNomUser.Text) 'Cambia a la primera letra en mayusculas y las demas en minusculas
+End Sub
+
+Private Sub TxtNomUser_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtNomUser.Text = WorksheetFunction.Trim(TxtNomUser.Text) 'Quitar espacios en cualquier ubicacion
+End Sub
+Private Sub TxtNumArtMay_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtNumArtMay.Text = FormatNumber(TxtNumArtMay.Text, 0)
+End Sub
+
+Private Sub TxtNumArtMay_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii = 48 Or KeyAscii = 49 Or KeyAscii = 50 Or KeyAscii = 51 Or KeyAscii = 52 Or KeyAscii = 53 Or KeyAscii = 54 Or KeyAscii = 55 Or KeyAscii = 56 Or KeyAscii = 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtNumArts_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    If TxtNumArts = "" Then
+    Else
+        TxtNumArtMay.Text = Format(TxtNumArtMay.Text, "##,##0.00")
+    End If
+End Sub
+
+Private Sub TxtNumArts_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii < 48 Or KeyAscii > 57 Then
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtPrecioCosto_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtTotCompra.Text = Format(TxtTotCompra.Text, "##,##0.00")
+End Sub
+
+Private Sub TxtPrecioCosto_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii = 44 Or KeyAscii = 46 Or KeyAscii = 48 Or KeyAscii = 49 Or KeyAscii = 50 Or KeyAscii = 51 Or KeyAscii = 52 Or KeyAscii = 53 Or KeyAscii = 54 Or KeyAscii = 55 Or KeyAscii = 56 Or KeyAscii = 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtPrecioVta_Change()
+    'llena el equivalente en USD los campos
+    If TxtTipoCambio = 0 Or TxtPrecioVta = "" Then
+    Else
+        TxtEquivTC = FormatNumber(TxtPrecioVta / TxtTipoCambio, 2)
+        If TxtDscto > 0 Then
+            TxtDsctoUSD = FormatNumber(Val(TxtDscto) / Val(TxtTipoCambio), 2)
+        End If
+    End If
+End Sub
+
+Private Sub TxtPrecMayoreo_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtPrecMayoreo.Text = Format(TxtPrecMayoreo.Text, "##,##0.00")
+End Sub
+
+Private Sub TxtPrecMayoreo_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii = 46 Or KeyAscii = 48 Or KeyAscii = 49 Or KeyAscii = 50 Or KeyAscii = 51 Or KeyAscii = 52 Or KeyAscii = 53 Or KeyAscii = 54 Or KeyAscii = 55 Or KeyAscii = 56 Or KeyAscii = 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtRecibido_Change()
+    LstArticCaja.Visible = False
+    LstCliente.Visible = False
+    If TxtRecibido = "" Then
+    Else
+        TxtCambio = FormatNumber(TxtTotVenta - TxtRecibido, 2)
+    End If
+End Sub
+
+Private Sub TxtRecibido_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    If TxtRecibido = "" Then
+    Else
+        TxtRecibido = FormatNumber(TxtRecibido, 2)
+    End If
+End Sub
+
+Private Sub TxtRecibido_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii = 44 Or KeyAscii = 46 Or KeyAscii = 48 Or KeyAscii = 49 Or KeyAscii = 50 Or KeyAscii = 51 Or KeyAscii = 52 Or KeyAscii = 53 Or KeyAscii = 54 Or KeyAscii = 55 Or KeyAscii = 56 Or KeyAscii = 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtRFCProv_Change()
+    TxtRFCProv = Left(TxtRFCProv.Text, 13)
+    TxtRFCProv = UCase(TxtRFCProv)
+End Sub
+
+Private Sub TxtStockMin_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    If TxtStockMin = "" Then
+    Else
+        TxtStockMin.Text = FormatNumber(TxtStockMin.Text, 0) 'Dar formato de numero
+    End If
+End Sub
+
+Private Sub TxtStockMin_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii = 48 Or KeyAscii = 49 Or KeyAscii = 50 Or KeyAscii = 51 Or KeyAscii = 52 Or KeyAscii = 53 Or KeyAscii = 54 Or KeyAscii = 55 Or KeyAscii = 56 Or KeyAscii = 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtTelProv_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii < 48 Or KeyAscii > 57 Then
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtTelUser_Change()
+    TxtTelUser = Left(TxtTelUser.Text, 10) 'Limita el numero de caracteres
+End Sub
+
+Private Sub TxtTelUser_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtTelUser.Text = WorksheetFunction.Trim(TxtTelUser.Text)
+End Sub
+
+Private Sub TxtTelUser_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii < 48 Or KeyAscii > 57 Then
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtTipoCambio_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii = 44 Or KeyAscii = 46 Or KeyAscii = 48 Or KeyAscii = 49 Or KeyAscii = 50 Or KeyAscii = 51 Or KeyAscii = 52 Or KeyAscii = 53 Or KeyAscii = 54 Or KeyAscii = 55 Or KeyAscii = 56 Or KeyAscii = 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtTotCompra_Change()
+    LstBuscaProd.Visible = False
+End Sub
+
+Private Sub TxtTotCompra_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtTotCompra.Text = Format(TxtTotCompra.Text, "##,##0.00")
+End Sub
+
+Private Sub TxtTotVenta_Change()
+    If TxtTipoCambio = 0 Then
+    Else
+        TxtTotUsd = FormatNumber(TxtTotVenta / TxtTipoCambio, 2)
+    End If
+End Sub
+
+Private Sub TxtVenta_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtVenta.Text = Format(TxtVenta.Text, "##,##0.00") 'Dar formato de numero
+End Sub
+
+Private Sub TxtVenta_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii = 44 Or KeyAscii = 46 Or KeyAscii = 48 Or KeyAscii = 49 Or KeyAscii = 50 Or KeyAscii = 51 Or KeyAscii = 52 Or KeyAscii = 53 Or KeyAscii = 54 Or KeyAscii = 55 Or KeyAscii = 56 Or KeyAscii = 57 Then
+    Else
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub TxtVigA_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    'VALIDA DATO CAPTURADO QUE SERA FECHA
+    If TxtVigA = "" Then
+        TxtVigA = ""
+    Else
+        If IsDate(TxtVigA) = False Then 'Si el dato ingresado en el campo no es fecha
+            MsgBox "El dato ingresado no es una fecha", vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Cancel = True
+            TxtVigA = Empty
+        Else
+            TxtVigA = Format(CDate(TxtVigA), "dd/mm/yyyy")
+        End If
+    End If
+End Sub
+
+Private Sub TxtVigDe_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    'VALIDA DATO CAPTURADO QUE SERA FECHA
+    If TxtVigDe = "" Then
+        TxtVigDe = ""
+    Else
+        If IsDate(TxtVigDe) = False Then 'Si el dato ingresado en el campo no es fecha
+            MsgBox "El dato ingresado no es una fecha", vbOKOnly + vbCritical, "Sistema Punto de Venta"
+            Cancel = True
+            TxtVigDe = Empty
+        Else
+            TxtVigDe = Format(CDate(TxtVigDe), "dd/mm/yyyy")
+        End If
+    End If
+End Sub
+
+Private Sub UserForm_Initialize()
+    LblFechaHoy = Format(Now, "dd/mm/yyyy")
+    
+    TxtUser.SetFocus
+    
+    Me.StartUpPosition = 0 'Manual
+    Me.Top = 20   'Desde la parte superior
+    Me.Left = 15  'Desde el margen izquierdo
+    Me.MultiPage1.Value = 0
+
+    LblCambiarUser.Visible = False
+    LblCerrarSesion.Visible = False
+End Sub

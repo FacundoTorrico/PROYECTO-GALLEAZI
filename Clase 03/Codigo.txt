@@ -1,0 +1,475 @@
+Tamaños:
+Formulario 	Heigh: 521 with: 805
+MultiPage	Heigh: 372 with: 690
+		left:   90 Top:   66
+Botones 	Heigh: 24  with: 78
+
+
+Public IDUsr As String
+Private Sub CmdArticulos_Click()
+    Me.MultiPage1.Value = 4
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = True
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(64, 64, 64)
+    CmdArticulos.ForeColor = RGB(255, 255, 255)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdClienProv_Click()
+    Me.MultiPage1.Value = 5
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = True
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(64, 64, 64)
+    CmdClienProv.ForeColor = RGB(255, 255, 255)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdCompras_Click()
+    Me.MultiPage1.Value = 3
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = True
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCompras.BackColor = RGB(64, 64, 64)
+    CmdCompras.ForeColor = RGB(255, 255, 255)
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdConfig_Click()
+    Me.MultiPage1.Value = 9
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = True
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(0, 0, 0) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(64, 64, 64)
+    CmdConfig.ForeColor = RGB(255, 255, 255)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdCorteCaja_Click()
+    Me.MultiPage1.Value = 2
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(2).Enabled = True
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(64, 64, 64)
+    CmdCorteCaja.ForeColor = RGB(255, 255, 255)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdCaja_Click()
+    Me.MultiPage1.Value = 1 '
+    MultiPage1.Pages(0).Enabled = False 'con False: Deshabilita la pestaña 1
+    MultiPage1.Pages(1).Enabled = True  'Habilita la pestaña cero (0) o de nombre inicio
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(64, 64, 64) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(255, 255, 255) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+    
+End Sub
+
+Private Sub CmdEmpresa_Click()
+    Me.MultiPage1.Value = 8
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = True
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(0, 0, 0) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(64, 64, 64)
+    CmdEmpresa.ForeColor = RGB(255, 255, 255)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdGuardar_Click()
+    Set u = Sheets("Usuarios")
+    uf = u.Range("A" & Rows.Count).End(xlUp).Row + 1
+    If CmbUsers = "" Or TxtPass = "" Or TxtNomUser = "" Or TxtEmailUser = "" Or TxtTelUser = "" Or TxtTelUser = "" Then
+        MsgBox "Datos incompletos, no se puede procesar su peticion ", vbOKOnly + vbCritical, "Sistema Punto de Venta"
+        Exit Sub
+    ElseIf MsgBox("¿Desea guardar el registro?", vbExclamation + vbYesNo, "Sistema Punto de Venta") = vbNo Then
+        Exit Sub
+    Else
+        'Worksheets("Usuarios").Unprotect Password:="***"
+        ID = u.Cells(uf, 1).Value + 1
+        u.Cells(uf, 1) = IDUser
+        u.Cells(uf, 2) = CmbUsers
+        u.Cells(uf, 3) = TxtPass
+        u.Cells(uf, 4) = TxtNomUser
+        u.Cells(uf, 5) = TxtEmailUser
+        u.Cells(uf, 6) = TxtTelUser
+        u.Cells(uf, 7) = TxtDomUser
+        'Worksheets("Usuarios").Protect Password:="***"
+        ActiveWorkbook.Save
+    End If
+
+End Sub
+Sub IDUser()
+    Set u = Sheets("Usuarios")
+    uf = u.Range("A" & Rows.Count).End(xlUp).Row
+    For i = 1 To uf
+        IDUsr = u.Cells(i, 1).Value
+        If IDUsr = "" Or IDUsr = "ID" Then
+            IDUsr = 1
+        Else
+            IDUsr = IDUsr + 1
+        End If
+    Next i
+End Sub
+Private Sub CmdInicio_Click()
+    Me.MultiPage1.Value = 0
+    MultiPage1.Pages(0).Enabled = True
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdInventario_Click()
+    Me.MultiPage1.Value = 10
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = True
+    
+    CmdCaja.BackColor = RGB(192, 192, 192) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(0, 0, 0) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(64, 64, 64)
+    CmdInventario.ForeColor = RGB(255, 255, 255)
+End Sub
+
+Private Sub CmdReportes_Click()
+    Me.MultiPage1.Value = 6 '
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = True
+    MultiPage1.Pages(7).Enabled = False
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(0, 0, 0) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(64, 64, 64)
+    CmdReportes.ForeColor = RGB(255, 255, 255)
+    CmdUsuarios.BackColor = RGB(192, 192, 192)
+    CmdUsuarios.ForeColor = RGB(0, 0, 0)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdUsuarios_Click()
+    Me.MultiPage1.Value = 7
+    MultiPage1.Pages(0).Enabled = False
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    MultiPage1.Pages(4).Enabled = False
+    MultiPage1.Pages(5).Enabled = False
+    MultiPage1.Pages(6).Enabled = False
+    MultiPage1.Pages(7).Enabled = True
+    MultiPage1.Pages(8).Enabled = False
+    MultiPage1.Pages(9).Enabled = False
+    MultiPage1.Pages(10).Enabled = False
+    
+    CmdCaja.BackColor = RGB(192, 192, 192) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(0, 0, 0) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+    CmdArticulos.BackColor = RGB(192, 192, 192)
+    CmdArticulos.ForeColor = RGB(0, 0, 0)
+    CmdClienProv.BackColor = RGB(192, 192, 192)
+    CmdClienProv.ForeColor = RGB(0, 0, 0)
+    CmdReportes.BackColor = RGB(192, 192, 192)
+    CmdReportes.ForeColor = RGB(0, 0, 0)
+    CmdUsuarios.BackColor = RGB(64, 64, 64)
+    CmdUsuarios.ForeColor = RGB(255, 255, 255)
+    CmdEmpresa.BackColor = RGB(192, 192, 192)
+    CmdEmpresa.ForeColor = RGB(0, 0, 0)
+    CmdConfig.BackColor = RGB(192, 192, 192)
+    CmdConfig.ForeColor = RGB(0, 0, 0)
+    CmdInventario.BackColor = RGB(192, 192, 192)
+    CmdInventario.ForeColor = RGB(0, 0, 0)
+    
+End Sub
+
+Private Sub TxtNomUserr_Change()
+    TxtNomUser.Text = UCase(TxtNomUser.Text)
+End Sub
+
+Private Sub TxtDomUser_Change()
+    TxtDomUser.Text = UCase(TxtDomUser.Text)
+End Sub
+
+Private Sub TxtDomUser_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtNomUser.Text = WorksheetFunction.Trim(TxtNomUser.Text)
+End Sub
+
+Private Sub Txtemail_Change()
+
+End Sub
+
+Private Sub TxtNomUser_Change()
+    'TxtNomUser.Text = UCase(TxtNomUser.Text) 'Cambia el texto a mayusculas
+    'TxtNomUser.Text = LCase(TxtNomUser.Text) 'Cambia el texto a minusculas
+    'TxtNomUser.Text = LTrim(TxtNomUser.Text) 'Quita espacios al principio
+    TxtNomUser.Text = WorksheetFunction.Proper(TxtNomUser.Text) 'Cambia a la primera letra en mayusculas y las demas en minusculas
+End Sub
+
+Private Sub TxtNomUser_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtNomUser.Text = WorksheetFunction.Trim(TxtNomUser.Text) 'Quitar espacios en cualquier ubicacion
+End Sub
+
+Private Sub TxtPass_Change()
+
+End Sub
+
+Private Sub TxtTelUser_Change()
+    TxtTelUser = Left(TxtTelUser.Text, 10) 'Limita el numero de caracteres
+End Sub
+
+Private Sub TxtTelUser_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    TxtTelUser.Text = WorksheetFunction.Trim(TxtTelUser.Text)
+End Sub
+
+Private Sub TxtTelUser_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    If KeyAscii < 48 Or KeyAscii > 57 Then
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub UserForm_Initialize()
+    LblFechaHoy = Format(Now, "dd/mm/yyyy")
+End Sub

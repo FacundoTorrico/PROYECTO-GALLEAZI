@@ -1,0 +1,6 @@
+Eventos.- Es una accion que ejecuta el codigo que se ha programado en un control u objeto.
+	ejemplo: al dar clic en un objeto o boton, abre un opcion o guarda los datos capturados en un formulario o ejecuta la accion para que 	este fue programado.
+
+Propiedades.- Son caracteristicas que tiene cada objeto, boton, formulario o control, tales como: nombre, color de fondo, color de letra, 	tamaño, etc.
+
+

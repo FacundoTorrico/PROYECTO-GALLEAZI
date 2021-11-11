@@ -1,0 +1,26 @@
+Eventos.- Es una accion que ejecuta el codigo que se ha programado en un control u objeto.
+ejemplo: al dar clic en un objeto o boton, abre un opcion o guarda los datos capturados en un formulario o ejecuta la accion para que este fue programado.
+
+Propiedades.- Son caracteristicas que tiene cada objeto, boton, formulario o control, tales como: nombre, color de fondo, color de letra, tamaño, etc.
+
+Colores RGB.- RGB (sigla en inglés de red, green, blue, en español «rojo, verde y azul»), es la composición del color en términos de la intensidad de los colores primarios de la luz.
+
+CODIGO ASCII.- es un código numérico que representa los caracteres, usando una escala decimal del 0 al 127. Esos números decimales son convertidos por la computadora en números binarios para ser posteriormente procesados. Por lo tanto, cada una de las letras que escribas va a corresponder a uno de estos códigos.
+
+Variables.- Una variable es un adjetivo que puede contener un dato o una serie de dato tales como una cadena de texto, valor numerico, fecha, etc. Y como su nombre lo dice su dato puede cambiar en determinado momento, y adquiere su valor durante la ejecucion de un procedimiento, una vez terminado el procedimiento deja de conservar su valor.
+
+Variable a nivel de procedimiento.- Esta disponible durante la ejecucion de un prodecimiento donde fue declarada
+
+Variable a nivel de modulo.- Esta disponible durante la ejecucion de un modulo donde fue declarada
+
+Variable a nivel de Proyecto.- Esta disponible durante la ejecucion de un proyecto donde fue declarada.
+
+Tipos de variables.- En el siguiente link encontraremos informacion de los tipos de variables
+https://ayudaexcel.com/tipos-variables-puedo-encontrar-vba-excel/
+
+
+
+
+
+
+

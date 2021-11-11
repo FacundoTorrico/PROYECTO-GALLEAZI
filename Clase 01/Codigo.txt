@@ -1,0 +1,66 @@
+Tamaños:
+Formulario 	Heigh: 521 with: 805
+MultiPage	Heigh: 372 with: 690
+Botones 	Heigh: 24  with: 78
+
+
+Private Sub CmdCompras_Click()
+    Me.MultiPage1.Value = 3
+    MultiPage1.Pages(3).Enabled = True
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    CmdCompras.BackColor = RGB(64, 64, 64)
+    CmdCompras.ForeColor = RGB(255, 255, 255)
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdCorteCaja_Click()
+    Me.MultiPage1.Value = 2
+    MultiPage1.Pages(2).Enabled = True
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(64, 64, 64)
+    CmdCorteCaja.ForeColor = RGB(255, 255, 255)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdCaja_Click()
+    Me.MultiPage1.Value = 1 '
+    MultiPage1.Pages(1).Enabled = True
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    CmdCaja.BackColor = RGB(64, 64, 64) 'Da color de fondo al boton
+    CmdCaja.ForeColor = RGB(255, 255, 255) 'Da color a la letra o fuente
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub CmdInicio_Click()
+    Me.MultiPage1.Value = 0
+    MultiPage1.Pages(0).Enabled = True
+    MultiPage1.Pages(1).Enabled = False
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+    CmdCaja.BackColor = RGB(192, 192, 192)
+    CmdCaja.ForeColor = RGB(0, 0, 0)
+    CmdCorteCaja.BackColor = RGB(192, 192, 192)
+    CmdCorteCaja.ForeColor = RGB(0, 0, 0)
+    CmdCompras.BackColor = RGB(192, 192, 192)
+    CmdCompras.ForeColor = RGB(0, 0, 0)
+End Sub
+
+Private Sub UserForm_Initialize()
+    'Al iniciar el sistema ejecuta el siguiente codigo
+    MultiPage1.Pages(0).Enabled = True 'Habilita la pestaña cero (0) o de nombre inicio
+    MultiPage1.Pages(1).Enabled = False 'con False: Deshabilita la pestaña 1
+    MultiPage1.Pages(2).Enabled = False
+    MultiPage1.Pages(3).Enabled = False
+End Sub
